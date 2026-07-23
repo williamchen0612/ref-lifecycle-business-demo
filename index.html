@@ -901,6 +901,27 @@
     .recommendation-details { border-top: 1px solid var(--line); padding-top: 12px; }
     .recommendation-details summary { color: var(--brand); cursor: pointer; }
     .recommendation-details[open] summary { margin-bottom: 12px; }
+    .source-badge { display: inline-flex; margin-top: 6px; padding: 3px 7px; border-radius: 999px; background: var(--soft); color: var(--muted); font-size: 11px; }
+    .contract-browser { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 16px; }
+    .building-menu { display: grid; align-content: start; gap: 8px; }
+    .building-menu button { border: 1px solid var(--line); border-radius: 7px; background: var(--panel); padding: 12px; color: var(--ink); text-align: left; }
+    .building-menu button.active { border-color: var(--brand); background: rgba(23,107,135,.08); }
+    .building-menu small { display: block; margin-top: 5px; color: var(--muted); }
+    .contract-view-tabs { display: flex; gap: 8px; margin: 14px 0; }
+    .contract-view-tabs button.active { border-color: var(--brand); color: var(--brand); background: rgba(23,107,135,.08); }
+    .contract-card-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .contract-card { border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: var(--panel); }
+    .contract-card h3 { margin: 0 0 4px; font-size: 15px; }
+    .contract-card p { margin: 5px 0; color: var(--muted); }
+    .contract-card .actions { margin-top: 12px; justify-content: flex-start; }
+    .deviation-summary { display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 14px 16px; border: 1px solid rgba(161,59,59,.28); border-radius: 8px; background: rgba(161,59,59,.07); }
+    .deviation-summary strong { color: var(--risk); }
+    .deviation-field { border: 1px solid rgba(161,59,59,.42); background: rgba(161,59,59,.06); box-shadow: inset 3px 0 0 var(--risk); }
+    .deviation-field > span, .deviation-field > strong { color: var(--risk); }
+    .baseline-note { display: block; margin-top: 7px; color: var(--risk); font-size: 11px; line-height: 1.45; }
+    .confirmation-step-stack { display: grid; gap: 10px; }
+    .business-confirmation-form { margin-top: 10px; padding: 14px; border: 1px dashed var(--line); border-radius: 8px; background: var(--soft); }
+    .process-standard { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; font-weight: 400; }
 
     .hidden { display: none !important; }
 
@@ -922,6 +943,7 @@
       .assessment-dimension > summary { grid-template-columns: 1fr auto; }
       .dimension-conclusion { grid-column: 1 / -1; }
       .site-assessment-grid { grid-template-columns: 1fr; }
+      .contract-browser { grid-template-columns: 1fr; }
     }
     @media (max-width: 780px) {
       .app { grid-template-columns: 1fr; }
@@ -945,6 +967,7 @@
       .wbs-row input, .wbs-row select, .wbs-row small { grid-column: 2; }
       .recommendation-key-grid { grid-template-columns: 1fr; }
       .recommendation-field-grid { grid-template-columns: 1fr; }
+      .contract-card-grid { grid-template-columns: 1fr; }
       .assessment-dimension > summary { grid-template-columns: 1fr; }
       .summary-item { border-right: 0; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
       .milestone { grid-template-columns: 1fr; }
@@ -1187,18 +1210,20 @@
 
         <section class="view hidden" id="view-lease-project">
           <div class="panel" id="leaseProjectList">
-            <div class="panel-head"><h2>租赁项目列表</h2><small>按区域、类型、阶段、负责人和风险筛选</small></div>
+            <div class="panel-head"><div><h2>租赁项目列表</h2><small>按区域、类型、阶段、负责人和风险筛选</small></div><div class="actions"><select id="newProjectType" aria-label="新建项目类型"><option value="new">新租</option><option value="expansion">扩租</option><option value="renew">续租</option><option value="surrender">退租</option><option value="relocation">换租（派生两个项目）</option></select><button class="btn primary" id="createLeaseProjectBtn">创建项目</button></div></div>
             <div class="panel-body table-wrap">
               <table>
                 <thead><tr><th>项目编号</th><th>项目名称</th><th>类型</th><th>城市</th><th>当前阶段</th><th>Transaction Manager</th><th>Target Day 1</th><th>操作</th></tr></thead>
-                <tbody>
-                  <tr><td>TM-2026-SZ-004</td><td>深圳湾扩租</td><td>新租</td><td>深圳</td><td><span class="tag warn">选址评估中</span></td><td>吴斯敏</td><td>2026-10-30</td><td><button class="row-button" data-project-open data-project-name="深圳湾扩租" data-project-type="new" data-status-index="1">查看项目</button></td></tr>
-                  <tr><td>TM-2026-GZ-003</td><td>广州云图汇扩租</td><td>新租</td><td>广州</td><td><span class="tag">场地寻源中</span></td><td>夏超</td><td>2027-01-15</td><td><button class="row-button" data-project-open data-project-name="广州云图汇扩租" data-project-type="new" data-status-index="0">查看项目</button></td></tr>
+                <tbody id="leaseProjectRows">
+                  <tr><td>TM-2026-SZ-004</td><td>深圳湾扩租</td><td>扩租</td><td>深圳</td><td><span class="tag warn">选址评估中</span></td><td>吴斯敏</td><td>2026-10-30</td><td><button class="row-button" data-project-open data-project-name="深圳湾扩租" data-project-type="new" data-status-index="1">查看项目</button></td></tr>
+                  <tr><td>TM-2026-GZ-003</td><td>广州云图汇扩租</td><td>扩租</td><td>广州</td><td><span class="tag">场地寻源中</span></td><td>夏超</td><td>2027-01-15</td><td><button class="row-button" data-project-open data-project-name="广州云图汇扩租" data-project-type="new" data-status-index="0">查看项目</button></td></tr>
                   <tr><td>TM-2026-SH-002</td><td>上海前滩续租</td><td>续租</td><td>上海</td><td><span class="tag warn">续租谈判中</span></td><td>张玮</td><td>2026-09-01</td><td><button class="row-button" data-project-open data-project-name="上海前滩续租" data-project-type="renew" data-status-index="2">查看项目</button></td></tr>
-                  <tr><td>TM-2026-BJ-006</td><td>北京望京换租</td><td>换租</td><td>北京</td><td><span class="tag warn">新址评估中</span></td><td>林琦</td><td>2027-03-31</td><td><button class="row-button" data-project-open data-project-name="北京望京换租" data-project-type="relocation" data-status-index="2">查看项目</button></td></tr>
+                  <tr><td>TM-2026-BJ-006-N</td><td>北京望京换租 · 新址</td><td>新租</td><td>北京</td><td><span class="tag warn">新址评估中</span></td><td>林琦</td><td>2027-03-31</td><td><button class="row-button" data-project-open data-project-name="北京望京换租 · 新址" data-project-type="new" data-status-index="2">查看项目</button><br><small>关联组 RG-BJ-006</small></td></tr>
+                  <tr><td>TM-2026-BJ-006-S</td><td>北京望京换租 · 原址退租</td><td>退租</td><td>北京</td><td><span class="tag">范围确认中</span></td><td>林琦</td><td>2027-06-30</td><td><button class="row-button" data-project-open data-project-name="北京望京换租 · 原址退租" data-project-type="surrender" data-status-index="1">查看项目</button><br><small>关联组 RG-BJ-006</small></td></tr>
                   <tr><td>TM-2025-NY-018</td><td>New York Expansion</td><td>新租</td><td>New York</td><td><span class="tag ok">Contract Signed</span></td><td>Noella Moon</td><td>2026-12-01</td><td><button class="row-button" data-project-open data-project-name="New York Expansion" data-project-type="new" data-status-index="4">查看项目</button></td></tr>
                 </tbody>
               </table>
+              <div class="save-status" id="createProjectStatus" aria-live="polite"></div>
             </div>
           </div>
 
@@ -1251,6 +1276,9 @@
                     <div class="info-cell"><span>楼宇地址</span><strong>深圳市南山区科苑南路 2666 号</strong></div>
                     <div class="info-cell"><span>租赁面积</span><strong>12,800 ㎡</strong></div>
                     <div class="info-cell"><span>使用面积</span><strong>10,240 ㎡</strong></div>
+                    <div class="info-cell"><span>起租日期</span><strong>2026-05-01</strong></div>
+                    <div class="info-cell"><span>到期日期</span><strong>2031-04-30</strong></div>
+                    <div class="info-cell"><span>租期</span><strong>5 年</strong></div>
                     <div class="info-cell"><span>拿场地时间</span><strong>2026-04-01</strong></div>
                     <div class="info-cell"><span>信息状态</span><strong><span class="tag ok">立项完成后登记</span></strong></div>
                   </div>
@@ -1273,12 +1301,12 @@
                   <div class="wbs-row child"><span>2.1</span><b>补充业主最终报价</b><input type="date" value="2026-02-06" data-plan-date><input type="date" data-actual-date><select><option>已完成</option><option selected>进行中</option><option>未开始</option></select><small>锁定报价有效期、免租和交付边界。</small></div>
                   <div class="wbs-row"><span>3.0</span><b>决策选址</b><input type="date" value="2026-03-09" data-plan-date><input type="date" data-actual-date><select><option>已完成</option><option selected>进行中</option><option>未开始</option></select><small>决策会确认推荐场地与关键商业条件。</small></div>
                   <div class="wbs-row child"><span>3.1</span><b>业务场地确认</b><input type="date" value="2026-03-10" data-plan-date><input type="date" data-actual-date><select><option>已完成</option><option selected>进行中</option><option>未开始</option></select><small>确认工位规模、通勤和交付条件。</small></div>
-                  <div class="wbs-row child"><span>3.2</span><b>租赁立项完成</b><input type="date" value="2026-03-18" data-plan-date><input type="date" data-actual-date><select><option>已完成</option><option>进行中</option><option selected>未开始</option></select><small>立项审批完成后准备合同申请。</small></div>
-                  <div class="wbs-row child"><span>3.3</span><b>场地信息登记</b><input type="date" value="2026-03-19" data-plan-date><input type="date" data-actual-date><select><option>已完成</option><option>进行中</option><option selected>未开始</option></select><small>立项完成后登记楼宇、楼层、面积与联系人。</small></div>
-                  <div class="wbs-row child"><span>3.4</span><b>CS 邮件同步</b><input type="date" value="2026-03-20" data-plan-date><input type="date" data-actual-date><select><option>已完成</option><option>进行中</option><option selected>未开始</option></select><small>场地信息登记完成后同步决策与关键条件。</small></div>
-                  <div class="wbs-row child"><span>3.5</span><b>合同签署</b><input type="date" value="2026-03-28" data-plan-date><input type="date" data-actual-date><select><option>已完成</option><option>进行中</option><option selected>未开始</option></select><small>合同审批、签署和台账回写。</small></div>
-                  <div class="wbs-row child"><span>3.6</span><b>拿场地时间 / Site Possession</b><input type="date" value="2026-04-01" data-plan-date><input type="date" data-actual-date><select><option>已完成</option><option>进行中</option><option selected>未开始</option></select><small>完成场地交付和钥匙移交。</small></div>
-                  <div class="wbs-row"><span>4.0</span><b>Target Day 1</b><input type="date" value="2026-10-30" data-plan-date><input type="date" data-actual-date><select><option>已完成</option><option>进行中</option><option selected>未开始</option></select><small>项目交付基线日期。</small></div>
+                  <div class="wbs-row child"><span>3.2</span><b>场地信息登记</b><input type="date" value="2026-03-12" data-plan-date><input type="date" data-actual-date><select><option>已完成</option><option>进行中</option><option selected>未开始</option></select><small>登记楼宇、楼层、面积、起止日期与租期。</small></div>
+                  <div class="wbs-row child"><span>3.3</span><b>租赁立项完成</b><input type="date" value="2026-03-18" data-plan-date><input type="date" data-actual-date><select><option>已完成</option><option>进行中</option><option selected>未开始</option></select><small>基于已登记场地完成预算、费用及风险审批。</small></div>
+                  <div class="wbs-row child"><span>3.4</span><b>CS 邮件同步</b><input type="date" value="2026-03-20" data-plan-date><input type="date" data-actual-date><select><option>已完成</option><option>进行中</option><option selected>未开始</option></select><small>立项完成后同步已登记的场地与决策信息。</small></div>
+                  <div class="wbs-row"><span>4.0</span><b>合同签署</b><input type="date" value="2026-03-28" data-plan-date><input type="date" data-actual-date><select><option>已完成</option><option>进行中</option><option selected>未开始</option></select><small>合同审批、签署和台账回写。</small></div>
+                  <div class="wbs-row"><span>5.0</span><b>拿场地时间 / Site Possession</b><input type="date" value="2026-04-01" data-plan-date><input type="date" data-actual-date><select><option>已完成</option><option>进行中</option><option selected>未开始</option></select><small>完成场地交付和钥匙移交。</small></div>
+                  <div class="wbs-row"><span>6.0</span><b>Target Day 1</b><input type="date" value="2026-10-30" data-plan-date><input type="date" data-actual-date><select><option>已完成</option><option>进行中</option><option selected>未开始</option></select><small>项目交付基线日期。</small></div>
                 </div>
                 <div class="save-status" id="planSaveStatus" aria-live="polite"></div>
               </section>
@@ -1364,31 +1392,31 @@
                   </summary>
                   <div class="process-body confirmation-layout">
                     <div class="assistant">
-                        <div class="document-workspace" aria-label="导入决策会文档">
+                        <div class="document-workspace hidden" aria-label="导入决策会文档">
                           <div><h3>导入决策会文档</h3><p>Site Recommendation 生成后，可导入决策会材料补充推荐场地的更多研究信息、商业条件、风险结论和会议决议。</p></div>
                           <div class="document-actions"><button class="btn" id="importDecisionDocBtn">导入决策会文档</button><span class="tag">自动补充选址确认字段</span></div>
                           <div class="save-status" id="decisionDocStatus" aria-live="polite"></div>
                         </div>
-                        <div class="recommendation-head"><div><h3>推荐场地决策材料</h3><small>Site Recommendation 生成后，线下补充的信息在此沉淀并进入确认流程。</small></div><span class="tag ok">金地威新创新科技中心</span></div>
-                        <div class="recommendation-groups">
+                        <div class="recommendation-head hidden"><div><h3>推荐场地决策材料</h3><small>Site Recommendation 生成后，线下补充的信息在此沉淀并进入确认流程。</small></div><span class="tag ok">金地威新创新科技中心</span></div>
+                        <div class="recommendation-groups hidden">
                           <details class="recommendation-group" open><summary><strong>1. 推荐摘要与决策结论</strong><span class="tag ok">推荐方案</span></summary><div class="recommendation-group-body"><div class="recommendation-field-grid"><div class="recommendation-field"><span>推荐楼宇</span><strong>金地威新创新科技中心</strong></div><div class="recommendation-field"><span>租赁 / 使用面积</span><strong>12,800 / 10,240 ㎡</strong></div><div class="recommendation-field"><span>工位数</span><strong>400</strong></div><div class="recommendation-field"><span>拿场地时间</span><strong>2026-04-01</strong></div><div class="recommendation-field"><span>租期</span><strong>5 年</strong></div><div class="recommendation-field"><span>起租日 / 到期日</span><strong>2026-05-01 / 2031-04-30</strong></div></div><div class="recommendation-form"><label>推荐理由<textarea>综合成本、合规、交付确定性、设计体验和未来扩容能力最佳。</textarea></label><label>待决策事项<textarea>确认预算上限、交付边界及业务方对通勤方案的接受度。</textarea></label><label class="wide">决策会议结论<textarea>待 2026-03-09 决策会确认；通过后解锁业务场地确认。</textarea></label></div></div></details>
                           <details class="recommendation-group" open><summary><strong>2. 成本合理性</strong><span class="tag warn">2 项待锁定</span></summary><div class="recommendation-group-body"><div class="recommendation-field-grid"><div class="recommendation-field"><span>表面租金（元 / 平 / 天）- 扩租</span><strong>6.60</strong></div><div class="recommendation-field"><span>有效租金（元 / 平 / 天）- 当期</span><strong>5.87</strong></div><div class="recommendation-field"><span>有效租金（元 / 平 / 天）- 扩租</span><strong>6.34</strong></div><div class="recommendation-field"><span>有效租金对比</span><strong>较扩租方案低 7.4%</strong></div><div class="recommendation-field"><span>物业费标准（元 / 平 / 月）</span><strong>18.00</strong></div><div class="recommendation-field"><span>租期内租赁成本（租金）</span><strong>¥38.0M</strong></div><div class="recommendation-field"><span>租期内租赁成本（物业）</span><strong>¥4.8M</strong></div><div class="recommendation-field"><span>押金金额</span><strong>¥7.6M</strong></div><div class="recommendation-field"><span>复原费</span><strong>¥2.2M · 待设上限</strong></div><div class="recommendation-field"><span>其他（buffer 等）</span><strong>¥1.1M</strong></div><div class="recommendation-field"><span>立项金额（租赁）</span><strong>¥48.6M</strong></div><div class="recommendation-field"><span>押金是否使用保函</span><strong>是 · 待业主确认</strong></div><div class="recommendation-field"><span>预估装修单方</span><strong>¥840 / ㎡</strong></div><div class="recommendation-field"><span>项目预估总成本（租赁 + 装修）</span><strong>¥57.2M</strong></div><div class="recommendation-field"><span>装修是否涉及指定供应商</span><strong>否</strong></div><div class="recommendation-field"><span>全周期成本（元 / 工位 / 月）</span><strong>¥6,820</strong></div><div class="recommendation-field"><span>财务口径（charge 业务）</span><strong>按实际占用工位分摊</strong></div></div><div class="document-actions"><button class="btn" data-fill-assessment="成本合理性">附评估文档</button><span class="save-status">决策会单工位成本测算表 / 成本合理性评估</span></div></div></details>
                           <details class="recommendation-group"><summary><strong>3. 楼宇合规评估</strong><span class="tag warn">有条件通过</span></summary><div class="recommendation-group-body"><div class="recommendation-field-grid"><div class="recommendation-field"><span>合规性综合判定</span><strong>有条件通过</strong></div><div class="recommendation-field wide"><span>楼宇合规评估说明</span><strong>消防、产权及用途文件齐备；出租权利授权链和无查封证明待补最新版本。</strong></div><div class="recommendation-field"><span>消防</span><strong>通过</strong></div><div class="recommendation-field"><span>产权</span><strong>通过</strong></div><div class="recommendation-field"><span>出租权利</span><strong>待补充授权文件</strong></div><div class="recommendation-field"><span>用途</span><strong>办公 · 通过</strong></div><div class="recommendation-field"><span>抵押、查封</span><strong>无查封；抵押权人同意待更新</strong></div><div class="recommendation-field"><span>技术风险（如有）</span><strong>机电交付边界需写入合同附件</strong></div><div class="recommendation-field"><span>我方签约主体 / 工商合规风险</span><strong>深圳分公司 · 不触发</strong></div></div><div class="document-actions"><button class="btn" data-fill-assessment="楼宇合规">附合规评估文档</button></div></div></details>
                           <details class="recommendation-group"><summary><strong>4. 灵活条款</strong><span class="tag warn">3 项待谈判</span></summary><div class="recommendation-group-body"><div class="recommendation-field-grid"><div class="recommendation-field wide"><span>条款对比</span><strong>较其他候选方案，免租及扩租权更优；退出与转租灵活性仍需加强。</strong></div><div class="recommendation-field"><span>提前退租权</span><strong>争取第 3 年起可执行</strong></div><div class="recommendation-field"><span>长期续租权</span><strong>有 · 同等条件优先</strong></div><div class="recommendation-field"><span>短期续租权</span><strong>有 · 6–12 个月</strong></div><div class="recommendation-field"><span>优先扩租权</span><strong>有 · 同楼优先</strong></div><div class="recommendation-field"><span>转租权</span><strong>关联方可转租 · 待确认</strong></div><div class="recommendation-field"><span>转让权</span><strong>需业主书面同意</strong></div><div class="recommendation-field"><span>我方违约至合同解除的罚则</span><strong>3 个月租金上限</strong></div><div class="recommendation-field"><span>出租方违约至合同解除的罚则</span><strong>返还押金并赔偿直接损失</strong></div><div class="recommendation-field"><span>退租复原条件</span><strong>按交付标准复原 · 争取费用上限</strong></div></div></div></details>
                           <details class="recommendation-group"><summary><strong>5. 设计核心体验指标</strong><span class="tag ok">整体达标</span></summary><div class="recommendation-group-body"><div class="recommendation-field-grid"><div class="recommendation-field"><span>工位区密度</span><strong>9.6 ㎡ / 工位</strong></div><div class="recommendation-field"><span>家具尺寸与间距</span><strong>1.4m 桌面 · 主通道 1.5m</strong></div><div class="recommendation-field"><span>层高</span><strong>净高 2.9m</strong></div><div class="recommendation-field"><span>采光率</span><strong>核心工位自然采光覆盖 78%</strong></div><div class="recommendation-field"><span>会议室配比</span><strong>1:14 · 建议增加 4 间小会议室</strong></div><div class="recommendation-field"><span>卫生间配比</span><strong>满足峰值人数要求</strong></div><div class="recommendation-field"><span>餐饮服务配套</span><strong>园区食堂 + 12 家步行餐饮</strong></div><div class="recommendation-field"><span>电梯运力</span><strong>午高峰平均候梯 46 秒</strong></div><div class="recommendation-field"><span>新风量</span><strong>32 m³/h/人</strong></div><div class="recommendation-field"><span>灯照</span><strong>工位面 420 lux</strong></div></div><div class="document-actions"><button class="btn" data-fill-assessment="设计核心体验">附设计评估文档</button></div></div></details>
                         </div>
-                        <div class="recommendation-head"><span class="save-status" id="recommendationSaveStatus" aria-live="polite"></span></div>
-                        <div class="decision-note">五个子流程按顺序串联：保存决策结论后解锁业务场地确认；业务确认完成后解锁租赁立项；立项完成后解锁场地信息登记；登记完成后解锁 CS 邮件同步。</div>
-                        <div class="sub-flow">
-                          <div class="integration" id="decisionFlowStep"><span class="integration-icon">1</span><div><b>保存决策结论</b><small>确认推荐场地、关键商业条件和决策会议结论。</small></div><div class="flow-actions"><button class="link-action" id="saveRecommendationBtn">保存结论</button><span class="tag warn" id="decisionFlowStatus">待保存</span></div></div>
-                          <div class="integration locked" id="businessFlowStep"><span class="integration-icon">2</span><div><b>业务场地确认</b><small>业务负责人确认推荐场地、工位规模、通勤和交付条件。</small></div><div class="flow-actions"><button class="link-action" id="completeBusinessConfirmationBtn" disabled>完成确认</button><span class="tag" id="businessConfirmationStatus">待解锁</span></div></div>
-                          <div class="integration locked" id="initiationFlowStep"><span class="integration-icon">3</span><div><b>租赁立项</b><small>业务确认完成后发起并完成预算、费用及风险审批。</small></div><div class="flow-actions"><button class="link-action" id="completeInitiationBtn" disabled>完成立项</button><span class="tag" id="initiationFlowStatus">待解锁</span></div></div>
-                          <div class="integration locked" id="registrationFlowStep"><span class="integration-icon">4</span><div><b>场地信息登记</b><small>立项完成后登记工区、楼宇、楼层、面积、时间节点和联系人。</small></div><div class="flow-actions"><button class="link-action" id="openSiteRegistrationBtn" disabled>填写登记</button><span class="tag" id="siteRegistrationFlowStatus">待解锁</span></div></div>
-                          <div class="integration locked" id="csEmailFlowStep"><span class="integration-icon">5</span><div><b>CS 邮件同步</b><small>场地信息登记完成后，基于已登记信息生成并发送同步邮件。</small></div><div class="flow-actions"><button class="link-action" id="openCsEmailBtn" disabled>填写邮件</button><span class="tag" id="csEmailFlowStatus">待解锁</span></div></div>
+                        <div class="recommendation-head hidden"><span class="save-status" id="recommendationSaveStatus" aria-live="polite"></span></div>
+                        <div class="decision-note">选址确认只保留五个串联子流程。每一步均由前序结果解锁，禁止跳步；场地信息登记工作区固定展示在第 3 步与第 4 步之间。</div>
+                        <div class="sub-flow confirmation-step-stack">
+                          <div class="integration" id="decisionFlowStep"><span class="integration-icon">1</span><div><b>上传决策文档存档</b><small>上传决策会材料，记录文件版本、上传人和存档时间。</small></div><div class="flow-actions"><button class="link-action" id="saveRecommendationBtn">上传并存档</button><span class="tag warn" id="decisionFlowStatus">待上传</span></div></div>
+                          <div class="integration locked" id="businessFlowStep"><span class="integration-icon">2</span><div><b>业务场地确认</b><small>业务负责人确认推荐场地、工位规模、通勤和交付条件。</small><div class="business-confirmation-form"><div class="basic-info-grid"><div class="info-cell"><span>推荐场地</span><strong>金地威新创新科技中心</strong><em class="source-badge">来源：决策会</em></div><div class="info-cell"><span>目标工位</span><strong>400</strong><em class="source-badge">来源：需求申请 SP-2026-018</em></div><div class="info-cell"><span>Target Day 1</span><strong>2026-10-30</strong><em class="source-badge">来源：需求申请</em></div><div class="info-cell"><span>业务确认人</span><strong>李想</strong><em class="source-badge">来源：项目团队</em></div></div></div></div><div class="flow-actions"><button class="link-action" id="completeBusinessConfirmationBtn" disabled>提交确认</button><span class="tag" id="businessConfirmationStatus">待解锁</span></div></div>
+                          <div class="integration locked" id="registrationFlowStep"><span class="integration-icon">3</span><div><b>场地信息登记</b><small>登记工区、楼宇、楼层、面积、起止日期和租期。</small></div><div class="flow-actions"><button class="link-action" id="openSiteRegistrationBtn" disabled>填写登记</button><span class="tag" id="siteRegistrationFlowStatus">待解锁</span></div></div>
+                          <div class="integration locked" id="initiationFlowStep"><span class="integration-icon">4</span><div><b>租赁立项</b><small>基于已登记场地发起并完成预算、费用及风险审批。</small></div><div class="flow-actions"><button class="link-action" id="completeInitiationBtn" disabled>完成立项</button><span class="tag" id="initiationFlowStatus">待解锁</span></div></div>
+                          <div class="integration locked" id="csEmailFlowStep"><span class="integration-icon">5</span><div><b>CS 邮件同步</b><small>立项完成后，复用已登记信息并校验收件人、标题、字段和附件。</small></div><div class="flow-actions"><button class="link-action" id="openCsEmailBtn" disabled>填写邮件</button><span class="tag" id="csEmailFlowStatus">待解锁</span></div></div>
                         </div>
                         <div class="document-workspace hidden" id="siteRegistrationWorkspace" aria-label="场地信息登记工作区">
-                          <div class="project-plan-head"><div><h3>场地信息登记</h3><p>系统基于选址决策和租赁立项预填场地字段，完成登记后才会解锁 CS 邮件同步。</p></div><div class="actions"><span class="tag warn" id="siteRegistrationStatus">填写中</span><button class="btn" id="closeSiteRegistrationBtn">收起</button></div></div>
-                          <div class="notice">租赁立项已完成 · 请核对场地详情、时间节点、联系人及附件。</div>
+                          <div class="project-plan-head"><div><h3>场地信息登记</h3><p>系统基于选址决策和业务场地确认预填字段；完成登记后才会解锁租赁立项。</p></div><div class="actions"><span class="tag warn" id="siteRegistrationStatus">填写中</span><button class="btn" id="closeSiteRegistrationBtn">收起</button></div></div>
+                          <div class="notice">业务场地确认已完成 · 请核对楼宇、楼层、面积、起止日期、租期、联系人及附件。</div>
                           <div id="siteRegistrationContent"></div>
                           <div class="confirmation-actions"><span class="save-status" id="siteRegistrationSaveStatus" aria-live="polite">请完成场地信息核对后提交登记。</span><button class="btn primary" id="completeSiteRegistrationBtn">完成场地登记</button></div>
                         </div>
@@ -1447,32 +1475,34 @@
         </section>
 
         <section class="view hidden" id="view-lease-contract">
-          <div class="grid" id="contractList">
+          <div id="contractList">
             <div class="panel">
-              <div class="panel-head"><h2>租赁合同台账</h2><small>与公司合同管理页面联动</small></div>
+              <div class="panel-head"><h2>按楼宇查看租赁合同</h2><small>同一楼宇可维护多份独立合同</small></div>
+              <div class="panel-body contract-browser">
+                <div class="building-menu" id="contractBuildingMenu"></div>
+                <div>
+                  <div class="basic-info-grid" id="contractBuildingSummary"></div>
+                  <div class="contract-view-tabs">
+                    <button class="btn active" type="button" data-contract-view="contract">按合同查看</button>
+                    <button class="btn" type="button" data-contract-view="floor">按楼层查看</button>
+                  </div>
+                  <div id="contractBuildingContent"></div>
+                </div>
+              </div>
+            </div>
+            <div class="panel" style="margin-top:18px">
+              <div class="panel-head"><h2>租赁合同台账</h2><small>全量合同 · 按项目、场地和状态统一查询</small></div>
               <div class="panel-body table-wrap">
                 <table>
-                  <thead><tr><th>合同编号</th><th>项目 / 场地</th><th>合同类型</th><th>租期</th><th>公司合同状态</th><th>关键提醒</th><th>操作</th></tr></thead>
-                  <tbody>
-                    <tr><td>待生成</td><td>深圳湾扩租 / 金地威新</td><td>Lease</td><td>5 年 + 3 年选择权</td><td><span class="tag warn">条款协商</span></td><td>退出条款待确认</td><td><button class="row-button" data-contract-open="sz">查看详情</button></td></tr>
-                    <tr><td>CTR-REF-2026-021</td><td>上海前滩续租 / 前滩中心</td><td>Renewal</td><td>3 年</td><td><span class="tag ok">已签署</span></td><td>2028-07 启动续租评估</td><td><button class="row-button" data-contract-open="sh">查看详情</button></td></tr>
-                    <tr><td>CTR-REF-2025-118</td><td>New York Expansion</td><td>Lease</td><td>7 年</td><td><span class="tag ok">已归档</span></td><td>年度 CPI 调价</td><td><button class="row-button" data-contract-open="ny">查看详情</button></td></tr>
-                  </tbody>
+                  <thead><tr><th>合同编号</th><th>项目 / 场地</th><th>合同类型</th><th>租赁楼层</th><th>租期</th><th>公司合同状态</th><th>关键提醒</th><th>操作</th></tr></thead>
+                  <tbody id="contractLedgerRows"></tbody>
                 </table>
               </div>
             </div>
-            <aside class="panel">
-              <div class="panel-head"><h2>合同系统联动</h2><small>System of record</small></div>
-              <div class="panel-body">
-                <div class="integration"><span class="integration-icon">1</span><div><b>创建合同申请</b><small>项目选址和立项通过后，带入交易与预算数据。</small></div><span class="tag ok">自动</span></div>
-                <div class="integration"><span class="integration-icon">2</span><div><b>查看审批与签署</b><small>REF 侧展示公司合同页面状态和关键节点。</small></div><span class="tag ok">联动</span></div>
-                <div class="integration"><span class="integration-icon">3</span><div><b>维护租赁台账</b><small>签署结果回写租期、面积、租金与提醒条款。</small></div><span class="tag ok">回写</span></div>
-              </div>
-            </aside>
           </div>
           <div class="panel hidden" id="contractDetail">
             <div class="panel-head"><div class="detail-title"><button class="btn back-btn" id="contractBackBtn" aria-label="返回合同台账" title="返回合同台账"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button><div><h2 id="contractDetailTitle">租赁合同详情</h2><small id="contractDetailMeta"></small></div></div><span class="tag warn" id="contractDetailStatus">条款协商</span></div>
-            <div class="panel-body project-detail-stack"><div class="notice">场地、面积、租期、租金基线和签约主体由选址审批及立项自动带入；合同阶段补充合同号、最终金额、商务条款和保证金。</div><div id="contractDetailContent"></div></div>
+            <div class="panel-body project-detail-stack"><div class="notice">场地、面积、租期、租金及商务条款保存独立决策基线。合同编辑不会覆盖上游历史，偏差字段将实时高亮。</div><div class="deviation-summary" id="contractDeviationSummary"><div><strong>2 个字段偏离决策基线</strong><small>其中 1 个高风险字段需确认后方可提交合同</small></div><button class="btn" id="confirmContractDeviationBtn">确认高风险偏差</button></div><div id="contractDetailContent"></div></div>
           </div>
         </section>
 
@@ -1634,6 +1664,17 @@
         ["提前退租权尚未接受。","Early termination right not yet accepted."],["暂不提供提前退租权。","Early termination right is not currently offered."],["长期续租权可谈。","Long-term renewal right is negotiable."],["长期续租权受限。","Long-term renewal right is limited."],["短期续租权可谈。","Short-term renewal right is negotiable."],["短期续租权受限。","Short-term renewal right is limited."],["扩租优先权可接受。","Priority expansion right is acceptable."],["同楼扩租优先权可行。","Same-building priority expansion is feasible."],["扩租权受限。","Expansion right is limited."],["转租权待补。","Sublease right pending."],["转租需书面同意。","Sublease requires written consent."],["转租限制较多。","Sublease is heavily restricted."],["关联方转让权待确认。","Affiliate assignment right pending confirmation."],["转让需书面同意。","Assignment requires written consent."],["转让限制较多。","Assignment is heavily restricted."],["我方违约罚则","Our Default Penalty"],["需设置责任上限。","A liability cap is required."],["责任上限需修改。","Liability cap requires revision."],["罚则较重。","Penalty is onerous."],["出租方违约罚则","Lessor Default Penalty"],["需设置对等责任。","Reciprocal liability is required."],["出租方责任较弱。","Lessor liability is weak."],["复原成本需设置上限。","Reinstatement cost requires a cap."]
       ]
     );
+    i18nPairs.push(
+      ["换租（派生两个项目）","Relocation (Create Two Projects)"],["创建项目","Create Project"],["扩租","Expansion"],["退租","Surrender"],["关联组","Relation Group"],
+      ["上传决策文档存档","Upload & Archive Decision Document"],["上传并存档","Upload & Archive"],["待上传","Pending Upload"],["已存档","Archived"],["提交确认","Submit Confirmation"],
+      ["按楼宇查看租赁合同","Lease Contracts by Building"],["同一楼宇可维护多份独立合同","Multiple independent contracts can be managed under one building"],
+      ["当前楼宇","Current Building"],["合同数量","Contract Count"],["总租赁面积","Total Leased Area"],["按合同查看","By Contract"],["按楼层查看","By Floor"],
+      ["租赁楼层","Leased Floors"],["租赁面积（分摊）","Allocated Lease Area"],["查看合同详情","View Contract Details"],["全量合同","All Contracts"],
+      ["决策基线","Decision Baseline"],["确认高风险偏差","Confirm High-risk Deviation"],["偏离决策基线","Deviations from Decision Baseline"],
+      ["楼宇合规评估","Building Compliance Assessment"],["租赁条款管控标准","Lease Terms Control Standard"],["标准：","Standard: "],
+      ["容纳人数上限（Occupancy Load）","Occupancy Load"],["供电情况","Power Supply"],["空调负荷","HVAC Load"],["设计方案","Design Proposal"],["技术风险（如有）","Technical Risks (if any)"],
+      ["费用补充说明","Additional Cost Notes"],["押金说明（押金标准，是否可保函）","Deposit Terms (standard and guarantee option)"],["施工是否指定供应商","Designated Contractor Required"],["全周期单工位成本","Lifecycle Cost per Seat"]
+    );
     const i18nReplacements = [...i18nPairs].sort((a, b) => b[0].length - a[0].length);
     const originalText = new WeakMap();
     const originalAttributes = new WeakMap();
@@ -1709,20 +1750,26 @@
     const workflow = [
       ["需求确认", "空间需求转入租赁项目", "done"],
       ["场地寻源", "Longlist to shortlist", "active"],
-      ["选址评估", "合规 / 技术 / 成本", "risk"],
-      ["选址审批", "决策会与立项联动", ""],
-      ["合同签署", "合同系统状态回写", ""]
+      ["选址评估", "合规 / 设计 / 成本 / 条款", "risk"],
+      ["选址确认", "上传决策文档存档", ""],
+      ["业务场地确认", "业务独立表单确认", ""],
+      ["场地信息登记", "楼宇、楼层、面积与租期", ""],
+      ["租赁立项", "预算、费用与风险审批", ""],
+      ["CS 邮件同步", "校验收件人、字段与附件", ""],
+      ["合同签署", "合同系统状态回写", ""],
+      ["拿场地", "交付及钥匙移交", ""],
+      ["Target Day 1", "业务正式启用", ""]
     ];
     const workflowSets = {
       new: workflow,
-      renew: [["续租需求确认", "核对业务需求与到期风险", "done"], ["续租评估", "容量、市场租金与替代方案", "active"], ["商务谈判", "续租报价与关键条款谈判", "risk"], ["续租审批", "推荐方案进入决策审批", ""], ["合同续签", "审批、签署与台账回写", ""]],
-      relocation: [["换租需求确认", "明确原址退出与新址需求", "done"], ["新址寻源", "候选场地与搬迁窗口", "active"], ["新址评估", "成本、技术与连续性评估", "risk"], ["换租审批", "新址与原址退出一体决策", ""], ["新合同签署", "签署新址合同并发出退租通知", ""], ["搬迁与交还", "新址启用、原址复原和结算", ""]]
+      renew: [["续租需求确认", "核对业务需求与到期风险", "done"], ["续租评估", "容量、市场租金与替代方案", "active"], ["商务谈判", "续租报价与关键条款谈判", "risk"], ["续租审批", "可继续续租或派生新租 + 退租项目", ""], ["合同续签", "审批、签署与台账回写", ""]],
+      surrender: [["退租需求", "沿用原需求来源与关联合同", "done"], ["退租范围确认", "楼层、资产、复原及通知边界", "active"], ["业务场地确认", "确认退出范围与业务影响", "risk"], ["退租审批", "预算、风险及正式通知审批", ""], ["正式通知", "向出租方发送退租通知", ""], ["复原与交还", "复原验收、钥匙和场地交还", ""], ["费用结算", "租金、物业、保证金及复原费", ""], ["台账关闭", "归档合同与审计记录", ""]]
     };
 
     const projectStatuses = {
       new: ["场地寻源中 / Site Sourcing", "选址评估中 / Site Evaluation", "选址审批中 / Site Selection in Approval", "合同签署中 / Contract In Progress", "合同已签署 / Contract Signed"],
       renew: ["续租需求确认中", "续租评估中", "续租谈判中", "续租审批中", "续租合同已签署"],
-      relocation: ["换租需求确认中", "新址寻源中", "新址评估中", "换租审批中", "新合同签署中", "搬迁与交还中"]
+      surrender: ["退租需求中", "退租范围确认中", "业务场地确认中", "退租审批中", "正式通知中", "复原与交还中", "费用结算中", "台账已关闭"]
     };
 
     const projectTemplates = {
@@ -1730,7 +1777,7 @@
         meta: "TM-2026-SZ-004 · 新租 / 扩租项目 · Transaction Manager: 吴斯敏",
         note: "需求确认即创建项目，默认进入场地寻源；短名单、评估、审批和合同完成将依次驱动项目状态。",
         fields: [["项目编号","TM-2026-SZ-004"],["项目类型","新租 / 扩租"],["REF Region","中国大陆区"],["城市","深圳"],["需求来源",'<a class="inline-link" href="#view-space" data-jump-view="space">SP-2026-018 · 查看空间需求流程</a>'],["目标工位 / 面积","400 / 12,800 ㎡"],["Target Day 1","2026-10-30"],["寻源策略","综合成本、交付、通勤与扩容能力"]],
-        wbs: [["1.0","短名单确认","2026-01-20","2026-01-20","已完成","提交后进入选址评估。"],["2.0","Site Recommendation","2026-02-10","","进行中","多专业评估和集中对比。"],["3.0","保存决策结论","2026-03-09","","未开始","保存后解锁业务场地确认。"],["3.1","业务场地确认","2026-03-10","","未开始","完成后解锁租赁立项。"],["3.2","租赁立项完成","2026-03-18","","未开始","完成后解锁场地信息登记。"],["3.3","场地信息登记","2026-03-19","","未开始","完成后解锁 CS 邮件同步。"],["3.4","CS 邮件同步","2026-03-20","","未开始","同步已登记的场地与决策信息。"],["4.0","合同签署时间","2026-03-28","","未开始","合同系统完成后自动回写。"],["5.0","拿场地时间 / Site Possession","2026-04-01","","未开始","完成交付与钥匙移交。"],["6.0","Target Day 1","2026-10-30","","未开始","业务正式启用。"]]
+        wbs: [["1.0","短名单确认","2026-01-20","2026-01-20","已完成","提交后进入选址评估。"],["2.0","Site Recommendation","2026-02-10","","进行中","多专业评估和集中对比。"],["3.0","上传决策文档存档","2026-03-09","","未开始","存档后解锁业务场地确认。"],["3.1","业务场地确认","2026-03-10","","未开始","完成后解锁场地信息登记。"],["3.2","场地信息登记","2026-03-12","","未开始","登记完成后解锁租赁立项。"],["3.3","租赁立项完成","2026-03-18","","未开始","完成后解锁 CS 邮件同步。"],["3.4","CS 邮件同步","2026-03-20","","未开始","同步已登记的场地与决策信息。"],["4.0","合同签署时间","2026-03-28","","未开始","合同系统完成后自动回写。"],["5.0","拿场地时间 / Site Possession","2026-04-01","","未开始","完成交付与钥匙移交。"],["6.0","Target Day 1","2026-10-30","","未开始","业务正式启用。"]]
       },
       renew: {
         meta: "TM-2026-SH-002 · 续租项目 · Transaction Manager: 张玮",
@@ -1739,12 +1786,12 @@
         wbs: [["1.0","业务续用确认","2026-04-15","2026-04-12","已完成","确认容量与组织规划。"],["2.0","市场租金及替代方案评估","2026-05-08","2026-05-09","已完成","形成谈判基准。"],["3.0","业主首轮报价","2026-05-20","2026-05-20","已完成","报价较现合同上涨 9%。"],["3.1","续租条款谈判","2026-06-10","","进行中","租金、租期、免租和选择权。"],["4.0","续租推荐与审批","2026-06-20","","未开始","比较续租与搬迁成本。"],["5.0","续租合同签署","2026-07-15","","未开始","完成合同和付款计划回写。"],["6.0","租赁台账更新","2026-07-18","","未开始","更新起止日期和关键条款。"]],
         process: `<details class="process-accordion" open><summary><span class="process-title"><span class="tag ok">完成</span><b>到期与业务需求评估</b></span><span class="tag risk">距通知截止 79 天</span></summary><div class="process-body"><div class="basic-info-grid"><div class="info-cell"><span>续用结论</span><strong>未来 3 年继续保留</strong></div><div class="info-cell"><span>容量缺口</span><strong>约 35 工位，可内部优化</strong></div><div class="info-cell"><span>不续租成本</span><strong>搬迁及装修约 ¥31.6M</strong></div><div class="info-cell"><span>关键风险</span><strong>错过通知期将自动顺延</strong></div></div></div></details><details class="process-accordion" open><summary><span class="process-title"><span class="tag warn">进行中</span><b>市场对标与商务谈判</b></span><span class="tag">第 2 轮报价</span></summary><div class="process-body"><div class="recommendation-form"><label>市场对标<textarea>同商圈可比楼宇有效租金 ¥225-245/㎡/月；当前业主报价 ¥259。</textarea></label><label>谈判目标<textarea>有效租金不高于 ¥248；3 个月免租；保留 2 年续租选择权与扩租优先权。</textarea></label><label>业主最新反馈<textarea>租金可下调至 ¥252，免租 2 个月；选择权条款待内部确认。</textarea></label><label>下一步<textarea>以搬迁全周期成本为底线完成 BAFO，并锁定 30 天报价有效期。</textarea></label></div></div></details><details class="process-accordion"><summary><span class="process-title"><span class="tag">待启动</span><b>续租决策与合同续签</b></span><span class="tag">审批材料</span></summary><div class="process-body"><div class="notice">决策材料需同时呈现续租 NPV、市场租金差异、替代场地成本、业务连续性风险及最终关键条款。审批通过后进入续租合同，不生成场地寻源或选址确认记录。</div></div></details>`
       },
-      relocation: {
-        meta: "TM-2026-BJ-006 · 换租项目 · Transaction Manager: 林琦",
-        note: "换租同时管理两条主线：新址寻源、评估和签约，以及原址退租通知、复原和交还；关键控制点是租期重叠和业务连续性。",
-        fields: [["项目编号","TM-2026-BJ-006"],["项目类型","换租"],["原址","北京望京 A 座 / L8-12"],["原合同到期日","2027-06-30"],["退租通知截止日","2026-12-31"],["换租原因","容量不足、机电老化、续租报价偏高"],["目标工位 / 面积","520 / 15,500 ㎡"],["新址 Target Day 1","2027-03-31"],["允许租期重叠","不超过 3 个月"],["原址复原预算","¥6.8M"],["搬迁窗口","2027-03-19 至 2027-03-28"],["连续性负责人","IT Infra · 赵凯"]],
-        wbs: [["1.0","换租需求与退出基线确认","2026-08-15","2026-08-14","已完成","锁定容量、预算与原合同义务。"],["2.0","新址长名单与短名单","2026-09-18","2026-09-18","已完成","短名单提交后进入新址评估。"],["3.0","新址技术/成本/连续性评估","2026-10-20","","进行中","含搬迁与双租成本。"],["4.0","换租方案审批","2026-11-15","","未开始","新址签约与原址退出一体审批。"],["5.0","新址合同签署","2026-12-10","","未开始","签署后发出原址退租通知。"],["5.1","原址退租通知","2026-12-15","","未开始","不得晚于合同通知截止日。"],["6.0","新址拿场与装修","2027-01-05","","未开始","交付、施工与网络切换。"],["7.0","业务搬迁 / Target Day 1","2027-03-31","","未开始","分批搬迁并完成切换。"],["8.0","原址复原与交还","2027-06-15","","未开始","验收、押金和最终结算。"]],
-        process: `<details class="process-accordion" open><summary><span class="process-title"><span class="tag ok">完成</span><b>原址退出基线</b></span><span class="tag risk">通知截止 2026-12-31</span></summary><div class="process-body"><div class="basic-info-grid"><div class="info-cell"><span>复原范围</span><strong>拆除非标准装修并恢复交付状态</strong></div><div class="info-cell"><span>预计押金回收</span><strong>¥4.2M</strong></div><div class="info-cell"><span>原址最晚交还</span><strong>2027-06-30</strong></div><div class="info-cell"><span>双租成本上限</span><strong>¥5.6M</strong></div></div></div></details><details class="process-accordion" open><summary><span class="process-title"><span class="tag warn">进行中</span><b>新址评估与换租决策</b></span><span class="tag">3 个候选新址</span></summary><div class="process-body"><div class="recommendation-form"><label>新址推荐<textarea>望京数字港 B 座：容量、地铁通勤和机电改造条件最优。</textarea></label><label>全周期成本<textarea>新租 NPV ¥186M；装修 ¥28M；搬迁 ¥3.4M；双租期预计 78 天。</textarea></label><label>业务连续性<textarea>网络双活提前 21 天；业务分三批周末搬迁；关键团队保留应急工位。</textarea></label><label>一体化决策事项<textarea>批准新址商业条件、原址退租通知、复原预算和租期重叠上限。</textarea></label></div></div></details><details class="process-accordion"><summary><span class="process-title"><span class="tag">待启动</span><b>签约、搬迁与原址交还</b></span><span class="tag">双轨执行</span></summary><div class="process-body"><div class="notice">新址合同签署后才能发出原址正式退租通知；施工、网络切换、搬迁、复原验收和押金结算分别记录实际完成时间，并共同决定项目关闭。</div></div></details>`
+      surrender: {
+        meta: "TM-2026-BJ-006-S · 退租项目 · Transaction Manager: 林琦 · 关联组 RG-BJ-006",
+        note: "换租不建立第三种流程：本项目仅负责原址退租，与独立的新租项目 TM-2026-BJ-006-N 双向关联，两边分别维护状态、审批、WBS 和合同。",
+        fields: [["项目编号","TM-2026-BJ-006-S"],["项目类型","退租"],["relation_group_id","RG-BJ-006"],["关联新租项目","TM-2026-BJ-006-N · 北京望京换租新址"],["原址","北京望京 A 座 / L8-12"],["原合同","CTR-REF-2022-039"],["退租通知截止日","2026-12-31"],["原址最晚交还","2027-06-30"],["复原预算","¥6.8M"],["预计押金回收","¥4.2M"]],
+        wbs: [["1.0","退租需求","2026-08-15","2026-08-14","已完成","沿用换租需求来源。"],["2.0","退租范围确认","2026-09-18","","进行中","确认楼层、资产和复原边界。"],["3.0","业务场地确认","2026-10-05","","未开始","确认业务退出范围。"],["4.0","退租审批","2026-11-15","","未开始","审批预算、风险与正式通知。"],["5.0","正式通知","2026-12-15","","未开始","不得晚于合同通知截止日。"],["6.0","复原与交还","2027-06-15","","未开始","验收、钥匙及场地交还。"],["7.0","费用结算","2027-06-25","","未开始","结清费用并回收保证金。"],["8.0","台账关闭","2027-06-30","","未开始","归档合同与审计记录。"]],
+        process: `<details class="process-accordion" open><summary><span class="process-title"><span class="tag warn">进行中</span><b>退租范围确认</b></span><span class="tag risk">通知截止 2026-12-31</span></summary><div class="process-body"><div class="basic-info-grid"><div class="info-cell"><span>退租楼层</span><strong>L8-12</strong></div><div class="info-cell"><span>复原范围</span><strong>拆除非标准装修并恢复交付状态</strong></div><div class="info-cell"><span>预计押金回收</span><strong>¥4.2M</strong></div><div class="info-cell"><span>原址最晚交还</span><strong>2027-06-30</strong></div></div></div></details><details class="process-accordion"><summary><span class="process-title"><span class="tag">待启动</span><b>审批、正式通知与交还</b></span><span class="tag">独立退租流程</span></summary><div class="process-body"><div class="notice">退租审批通过后才能发出正式通知；复原验收、费用结算和押金回收分别记录实际完成时间，并共同决定台账关闭。</div></div></details>`
       }
     };
 
@@ -1762,7 +1809,7 @@
       ["1.5 风险审批", [["是否需要法务审批","是"],["是否需要 PR 审批","是"],["是否需要 PA 审批","否"],["是否需要知会管理办公室","是"]]],
       ["2 CS 邮件", [["发送对象","CS、REF BP、项目团队、财务、法务"],["邮件标题","[CS Alignment] 深圳湾扩租 · 金地威新 · Site Confirmation"]]],
       ["2.1 场地详情", [["区域","中国大陆区"],["国家","中国"],["城市","深圳"],["办公/注册","办公"],["楼宇三字码","GDW"],["楼宇名称+楼号（中文）","金地威新创新科技中心 A 座"],["楼宇名称+楼号（英文）","Gemdale Viseen Innovation Center Tower A"],["签约主体","北京字节跳动科技有限公司深圳分公司"],["地址","深圳市南山区科苑南路 2666 号"],["租赁楼层/房间号","L12-16 / A、B 单元"],["租赁面积","12,800"],["租赁面积（单位）","㎡"],["使用面积","10,240"],["使用面积（单位）","㎡"],["预计工位数","400"],["使用部门","深圳业务团队"],["交付状态","现房 / 标准交付"],["是否需要退租还原","是"]]],
-      ["2.2 时间节点", [["租期","5 年"],["免租期（月）","6"],["预估完成合同签订日期","2026-03-28"],["总包收楼时间","2026-04-01"],["预估场地入驻日期","2026-10-30"]]],
+      ["2.2 时间节点", [["起租日期","2026-05-01"],["到期日期","2031-04-30"],["租期","5 年"],["免租期（月）","6"],["预估完成合同签订日期","2026-03-28"],["总包收楼时间","2026-04-01"],["预估场地入驻日期","2026-10-30"]]],
       ["2.3 内部联系人", [["规划 & BP","陈昕"],["租赁经理","吴斯敏"],["项目经理","何琪"],["设施经理","刘晨"],["IT 对接人","赵凯"],["行政对接人","孙宁"],["可增加","点击新增联系人"]]],
       ["2.4 大厦联系人", [["业主对接人","林敏 · 138 0000 3101 · linmin@landlord.example"],["物业对接人","周启 · 138 0000 3102 · zhouqi@property.example"],["社区负责人（共享办公）","不适用"],["IT 负责人","王工 · 138 0000 3103 · wangit@property.example"],["可增加","点击新增大厦联系人"]]],
       ["2.5 其他", [["其他信息","报价有效期 14 天；机电交付边界以合同附件为准。"],["照片","大堂、标准层、机房及周边照片 26 张"]]],
@@ -1775,15 +1822,48 @@
     const csEmailOnlyGroups = csEmailGroups.filter(([title]) => title === "邮件信息");
 
     const contractRecords = {
-      sz: { project: "深圳湾扩租 / 金地威新创新科技中心", number: "待生成", status: "条款协商", type: "Lease" },
+      szLegacy: { project: "深圳湾首租 / 金地威新创新科技中心", number: "CTR-REF-2022-056", status: "已签署", type: "Lease" },
+      sz: { project: "深圳湾扩租 / 金地威新创新科技中心", number: "待生成", status: "条款协商", type: "Expansion" },
       sh: { project: "上海前滩续租 / 前滩中心", number: "CTR-REF-2026-021", status: "已签署", type: "Renewal" },
       ny: { project: "New York Expansion", number: "CTR-REF-2025-118", status: "已归档", type: "Lease" }
     };
+    const contractBuildings = [
+      {
+        id: "sz-gdw", name: "金地威新创新科技中心", address: "深圳市南山区科苑南路 2666 号", area: "18,400 ㎡",
+        contracts: [
+          { id: "szLegacy", name: "深圳湾首租合同", number: "CTR-REF-2022-056", status: "已签署", floors: "L2-11", area: "5,600 ㎡", type: "首租", term: "2022-05-01 至 2027-04-30", reminder: "2026-10 启动续租评估" },
+          { id: "sz", name: "深圳湾扩租合同", number: "待生成", status: "条款协商", floors: "L12-16", area: "12,800 ㎡", type: "扩租", term: "2026-05-01 至 2031-04-30", reminder: "退出条款及保证金偏差待确认" }
+        ]
+      },
+      {
+        id: "sh-qt", name: "上海前滩中心 T2", address: "上海市浦东新区海阳西路 399 号", area: "9,600 ㎡",
+        contracts: [
+          { id: "sh", name: "上海前滩续租合同", number: "CTR-REF-2026-021", status: "已签署", floors: "L18-22", area: "9,600 ㎡", type: "续租", term: "2026-01-01 至 2028-12-31", reminder: "2028-07 启动续租评估" }
+        ]
+      },
+      {
+        id: "ny-hudson", name: "Hudson Yards Tower", address: "New York, NY", area: "8,900 ㎡",
+        contracts: [
+          { id: "ny", name: "New York Expansion Lease", number: "CTR-REF-2025-118", status: "已归档", floors: "L32-35", area: "8,900 ㎡", type: "Expansion", term: "2025-12-01 至 2032-11-30", reminder: "年度 CPI 调价" }
+        ]
+      }
+    ];
+    let activeContractBuilding = 0;
+    let activeContractView = "contract";
+    let contractDeviationConfirmed = false;
+    const contractBaselines = {
+      "租赁面积": { value: "12,800 ㎡", source: "业务场地确认 SITE-CONF-2026-031 · v3", severity: "normal" },
+      "起租日期": { value: "2026-05-01", source: "场地信息登记 SITE-REG-2026-031 · v1", severity: "normal" },
+      "到期日期": { value: "2031-04-30", source: "场地信息登记 SITE-REG-2026-031 · v1", severity: "normal" },
+      "物业费单价": { value: "¥32 / ㎡ / 月", source: "选址评估 COST-2026-031 · v4", severity: "normal" },
+      "合同单工位成本": { value: "¥6,820 / 工位 / 月", source: "选址决策 SITE-DEC-2026-031 · v2", severity: "warning" },
+      "保证金总额": { value: "¥7.60M", source: "选址决策 SITE-DEC-2026-031 · v2", severity: "high" }
+    };
     const contractGroups = [
       ["合同基本信息", [["区域","中国大陆区"],["国家/分区","中国 / 华南"],["城市","深圳"],["三字码","GDW"],["工区名称","深圳金地威新工区"],["合同号","待合同系统生成"],["楼号","A 座"],["楼层","L12-16"],["合同状态","条款协商"],["起租日期","2026-05-01"],["到期日期","2031-04-30"],["供应商类型","业主 / 出租方"],["供应商名称","金地威新发展有限公司"],["租赁面积","12,800 ㎡"]]],
-      ["1 合同金额", [["租金总额","¥38.0M"],["合同全周期租金总额（不考虑提前退）","¥38.0M"],["合同全周期物业费总金额","¥6.2M"],["合同有效租金","¥176 / ㎡ / 月"],["楼宇有效租金","¥181 / ㎡ / 月"],["城市有效租金","¥188 / ㎡ / 月"],["合同有效物业费","¥28 / ㎡ / 月"],["楼宇有效物业费","¥30 / ㎡ / 月"],["物业费单价","¥32 / ㎡ / 月"],["楼宇综合物业费","¥30 / ㎡ / 月"],["合同有效租金+物业费","¥204 / ㎡ / 月"],["历史最低有效租金+物业费","¥198 / ㎡ / 月"],["历史最高有效租金+物业费","¥226 / ㎡ / 月"],["楼宇有效租金+物业费","¥211 / ㎡ / 月"],["合同单工位成本","¥6,820 / 工位 / 月"],["工区单工位成本","¥7,050 / 工位 / 月"]]],
-      ["2 商务条款 by 合同", [["长期续租权（有/无）","有"],["长期续租权（商务条款说明）","租期届满可续租 3 年，提前 12 个月通知。"],["短期续租权（有/无）","有"],["短期续租权（商务条款说明）","可按月延租最多 6 个月，租金上浮 10%。"],["扩租权（有/无）","有"],["扩租权（商务条款说明）","同楼宇空置面积同等条件优先承租。"],["转租权（有/无）","有"],["转租权（商务条款说明）","经业主书面同意，可转租给关联方。"],["转让权（有/无）","有"],["转让权（商务条款说明）","集团内部重组可转让，提前书面通知。"],["提前退租权（有/无）","有"],["提前退租权（商务条款说明）","第 36 个月后可提前退租，支付 6 个月租金。"],["我方根本违约责任（有/无）","有"],["我方根本违约责任（商务条款说明）","逾期租金超过 30 日且催告后未补正。"],["对方根本违约责任（有/无）","有"],["对方根本违约责任（商务条款说明）","无法持续合法交付或重大权属瑕疵。"],["退租复原条件（有/无）","有"],["退租复原条件（商务条款说明）","拆除非标准装修，复原费用设置合同上限。"],["灵活性","较高 · 含续租、扩租、关联方转租和提前退租权"],["备注","最终条款以双方签署合同及附件为准。"]]],
-      ["3 保证金", [["保证金状态","待支付"],["保证金总额","¥8.10M"],["现金（可抵扣总额）","¥1.20M"],["租金保证金-现金","¥5.70M"],["租金保证金-现金（可抵扣）","¥0"],["租金保证金-保函","¥0"],["物业保证金-现金","¥0.96M"],["物业保证金-现金（可抵扣）","¥0"],["物业保证金-保函","¥0"],["其他现金-水电能耗/门禁/车位","¥1.44M"],["其他现金（可抵扣）","¥1.20M"],["其他保函-水电能耗/门禁/车位","¥0"],["押金（X 个月）","3 个月租金 + 3 个月物业费"],["保证金类型","现金"],["保证金总额（按工区汇总）","¥8.10M"]]]
+      ["合同金额", [["租金总额","¥38.0M"],["合同全周期租金总额（不考虑提前退）","¥38.0M"],["合同全周期物业费总金额","¥6.2M"],["合同有效租金","¥176 / ㎡ / 月"],["楼宇有效租金","¥181 / ㎡ / 月"],["城市有效租金","¥188 / ㎡ / 月"],["合同有效物业费","¥28 / ㎡ / 月"],["楼宇有效物业费","¥30 / ㎡ / 月"],["物业费单价","¥32 / ㎡ / 月"],["楼宇综合物业费","¥30 / ㎡ / 月"],["合同有效租金+物业费","¥204 / ㎡ / 月"],["历史最低有效租金+物业费","¥198 / ㎡ / 月"],["历史最高有效租金+物业费","¥226 / ㎡ / 月"],["楼宇有效租金+物业费","¥211 / ㎡ / 月"],["合同单工位成本","¥7,000 / 工位 / 月"],["工区单工位成本","¥7,050 / 工位 / 月"]]],
+      ["商务条款 by 合同", [["长期续租权（有/无）","有"],["长期续租权（商务条款说明）","租期届满可续租 3 年，提前 12 个月通知。"],["短期续租权（有/无）","有"],["短期续租权（商务条款说明）","可按月延租最多 6 个月，租金上浮 10%。"],["扩租权（有/无）","有"],["扩租权（商务条款说明）","同楼宇空置面积同等条件优先承租。"],["转租权（有/无）","有"],["转租权（商务条款说明）","经业主书面同意，可转租给关联方。"],["转让权（有/无）","有"],["转让权（商务条款说明）","集团内部重组可转让，提前书面通知。"],["提前退租权（有/无）","有"],["提前退租权（商务条款说明）","第 36 个月后可提前退租，支付 6 个月租金。"],["我方根本违约责任（有/无）","有"],["我方根本违约责任（商务条款说明）","逾期租金超过 30 日且催告后未补正。"],["对方根本违约责任（有/无）","有"],["对方根本违约责任（商务条款说明）","无法持续合法交付或重大权属瑕疵。"],["退租复原条件（有/无）","有"],["退租复原条件（商务条款说明）","拆除非标准装修，复原费用设置合同上限。"],["灵活性","较高 · 含续租、扩租、关联方转租和提前退租权"],["备注","最终条款以双方签署合同及附件为准。"]]],
+      ["保证金", [["保证金状态","待支付"],["保证金总额","¥8.10M"],["现金（可抵扣总额）","¥1.20M"],["租金保证金-现金","¥5.70M"],["租金保证金-现金（可抵扣）","¥0"],["租金保证金-保函","¥0"],["物业保证金-现金","¥0.96M"],["物业保证金-现金（可抵扣）","¥0"],["物业保证金-保函","¥0"],["其他现金-水电能耗/门禁/车位","¥1.44M"],["其他现金（可抵扣）","¥1.20M"],["其他保函-水电能耗/门禁/车位","¥0"],["押金（X 个月）","3 个月租金 + 3 个月物业费"],["保证金类型","现金"],["保证金总额（按工区汇总）","¥8.10M"]]]
     ];
 
     const workstreamRecords = {
@@ -1853,14 +1933,14 @@
     ];
     let teamEditing = false;
 
-    const assessmentCheck = (name, owner, values, custom = false) => ({ name, owner, values, custom });
+    const assessmentCheck = (name, owner, values, standard = "", custom = false) => ({ name, owner, values, standard, custom });
     const assessmentSummary = (status, values) => ({ name: "维度综合结论", owner: "共同评估", status, values, summary: true });
-    const otherAssessmentCheck = () => assessmentCheck("其他检查项", "评估人补充", ["请填写不在表单内的事项", "请填写不在表单内的事项", "请填写不在表单内的事项"], true);
+    const otherAssessmentCheck = () => assessmentCheck("其他检查项", "评估人补充", ["请填写不在表单内的事项", "请填写不在表单内的事项", "请填写不在表单内的事项"], "", true);
 
     const assessmentDimensions = [
       {
-        title: "合规与技术评估",
-        reviewers: ["赵明 · 合规", "孙悦 · 法务", "王工 · 机电"],
+        title: "楼宇合规评估",
+        reviewers: ["赵明 · 合规", "孙悦 · 法务"],
         checks: [
           assessmentCheck("消防", "赵明", ["消防备案齐备。", "消防备案齐备。", "联合办公消防备案齐备。"]),
           assessmentCheck("产权", "赵明", ["产权证明齐备。", "产权授权链待更新。", "产权证明待补充。"]),
@@ -1868,8 +1948,6 @@
           assessmentCheck("出租权利", "孙悦", ["完整授权链待补充。", "出租权利有条件通过。", "出租权利证明待补充。"]),
           assessmentCheck("抵押情况", "孙悦", ["无影响签约的抵押。", "抵押权人同意函待更新。", "抵押情况待确认。"]),
           assessmentCheck("查封情况", "孙悦", ["无查封。", "无查封。", "无查封证明待补充。"]),
-          assessmentCheck("技术风险", "王工", ["主要技术风险可控。", "技术交付边界待确认。", "网络隔离方案需确认。"]),
-          assessmentCheck("机电交付", "王工", ["机电容量满足，交付边界需写入附件。", "机电容量证明及交付标准待补。", "机电条件有条件通过。"]),
           assessmentCheck("我方签约主体", "孙悦", ["深圳分公司签约路径可行。", "深圳分公司可签约。", "签约主体待确认。"]),
           assessmentCheck("工商合规风险", "孙悦", ["不触发。", "不触发。", "需专项确认。"]),
           otherAssessmentCheck(),
@@ -1880,17 +1958,21 @@
         title: "设计评估",
         reviewers: ["林悦 · 设计", "陈昕 · 规划", "何琪 · 项目"],
         checks: [
-          assessmentCheck("工位区密度", "林悦", ["9.6㎡/工位。", "9.8㎡/工位。", "局部密度偏高。"]),
-          assessmentCheck("家具尺寸与间距", "林悦", ["主通道及家具间距满足标准。", "家具尺寸与间距达标。", "共享空间家具标准固定。"]),
-          assessmentCheck("层高", "林悦", ["净高 2.9m。", "净高 3.0m。", "净高 2.7m。"]),
-          assessmentCheck("采光率", "林悦", ["核心工位自然采光良好。", "景观面及采光表现最佳。", "核心区域采光达标。"]),
-          assessmentCheck("会议室配比", "陈昕", ["建议增加 4 间小型会议室。", "会议室配比达标。", "共享会议室高峰时段可能不足。"]),
-          assessmentCheck("卫生间配比", "陈昕", ["满足峰值人数要求。", "满足目标人数。", "高峰时段需复核。"]),
-          assessmentCheck("餐饮服务配套", "何琪", ["园区餐饮配套丰富。", "餐饮配套最佳。", "餐饮便利。"]),
-          assessmentCheck("电梯运力", "何琪", ["午高峰平均候梯 46 秒。", "电梯运力最佳。", "专属电梯受限。"]),
-          assessmentCheck("新风量", "何琪", ["新风量达标。", "新风量达标。", "新风控制受限。"]),
-          assessmentCheck("灯照", "何琪", ["照度达标。", "照度达标。", "照度达标。"]),
-          otherAssessmentCheck(),
+          assessmentCheck("容纳人数上限（Occupancy Load）", "林悦", ["满足 400 人设计使用。", "满足 420 人设计使用。", "上限需复核。"], "与设计工位数或使用人数比较"),
+          assessmentCheck("工位区密度", "林悦", ["5.5㎡/工位。", "5.7㎡/工位。", "4.6㎡/工位。"], "sqm/ws；A 5.5，B 4.4"),
+          assessmentCheck("家具尺寸与间距", "林悦", ["1.4m × 0.7m 升降桌，间距 2m。", "满足标准。", "局部间距需优化。"], "1.4m × 0.7m 升降桌，间距 2m"),
+          assessmentCheck("层高", "林悦", ["办公裸顶 3.8m，会议室 2.8m。", "满足标准。", "会议室 2.65m。"], "办公裸顶 ≥3.6m；会议室吊顶 ≥2.7m"),
+          assessmentCheck("采光率", "林悦", ["A 类标准 74%。", "A 类标准 78%。", "B 类标准 53%。"], "A 70%、B 50% 工位在采光面 7.5m 内"),
+          assessmentCheck("会议空间配比", "陈昕", ["1:9。", "1:8。", "1:12，需优化。"], "1:8～10"),
+          assessmentCheck("卫生间配比", "陈昕", ["满足当地标准。", "满足当地标准。", "女厕高峰需复核。"], "建议男厕 20:1、女厕 16:1"),
+          assessmentCheck("餐饮服务配套", "何琪", ["园区食堂 + 12 家餐饮。", "配套最佳。", "共享餐饮。"], "说明配餐模式、餐位数"),
+          assessmentCheck("电梯运力", "何琪", ["5 分钟载客率 9.2%。", "9.8%。", "7.6%，需优化。"], "5 分钟载客率 >8%，单梯 ≤400 人"),
+          assessmentCheck("新风量", "何琪", ["32 cmh/人。", "35 cmh/人。", "30 cmh/人。"], "开放办公区和会议室均 ≥30 cmh/人"),
+          assessmentCheck("灯光照度", "何琪", ["工位面 450 lux / 4000K。", "460 lux。", "410 lux。"], "400～500 lux，4000K"),
+          assessmentCheck("供电情况", "王工", ["市政双回路，68W/㎡。", "双回路，64W/㎡。", "单回路，需备用电源。"], "优先双回路；单方供电 ≥60W/㎡"),
+          assessmentCheck("空调负荷", "王工", ["冷热源满足。", "满足。", "加班空调受限。"], "说明供冷、供热情况"),
+          assessmentCheck("设计方案", "林悦", ["设计方案 V3.pdf。", "概念方案 V2.pdf。", "标准布局图.pdf。"], "提供设计方案文档链接"),
+          assessmentCheck("技术风险（如有）", "王工", ["机电交付边界需写入合同附件。", "增容责任待确认。", "网络隔离需专项尽调。"], "结论与第三方技术尽调文件"),
           assessmentSummary(["达标", "优秀", "需优化"], ["整体体验均衡，会议室配比可通过设计优化。", "设计体验最佳，但装修交付周期较长。", "可快速使用，品牌化及长期体验受限。"])
         ]
       },
@@ -1900,12 +1982,18 @@
         checks: [
           assessmentCheck("表面租金", "周宁", ["¥198/㎡/月", "¥205/㎡/月", "¥185/㎡/月"]),
           assessmentCheck("有效租金", "周宁", ["¥176/㎡/月", "¥190/㎡/月", "¥182/㎡/月"]),
-          assessmentCheck("租期内租赁成本", "周宁", ["租赁 38.0M。", "租赁 41.5M。", "租赁 35.8M。"]),
-          assessmentCheck("物业成本", "周宁", ["物业 4.8M。", "物业 5.1M。", "运营服务费较高。"]),
-          assessmentCheck("押金", "刘倩", ["争取押金保函。", "押金比例需谈判。", "押金较低。"]),
-          assessmentCheck("复原", "刘倩", ["复原费需设置上限。", "复原责任需谈判。", "复原范围较轻。"]),
-          assessmentCheck("Buffer", "刘倩", ["Buffer 1.1M。", "Buffer 1.4M。", "Buffer 1.0M。"]),
-          otherAssessmentCheck(),
+          assessmentCheck("物业费单价", "周宁", ["¥32/㎡/月", "¥35/㎡/月", "已含服务费"]),
+          assessmentCheck("费用补充说明", "周宁", ["6 个月免租。", "4 个月免租。", "运营费另计。"]),
+          assessmentCheck("总租金", "周宁", ["¥38.0M", "¥41.5M", "¥35.8M"]),
+          assessmentCheck("总物业费", "周宁", ["¥4.8M", "¥5.1M", "¥6.4M"]),
+          assessmentCheck("押金总额", "刘倩", ["¥7.6M", "¥8.2M", "¥3.0M"]),
+          assessmentCheck("押金说明（押金标准，是否可保函）", "刘倩", ["3 个月，可争取保函。", "3 个月，现金。", "2 个月，现金。"]),
+          assessmentCheck("复原费", "刘倩", ["¥2.2M，需设上限。", "¥2.6M。", "¥0.8M。"]),
+          assessmentCheck("其他", "刘倩", ["Buffer ¥1.1M。", "Buffer ¥1.4M。", "Buffer ¥1.0M。"]),
+          assessmentCheck("预估装修单方造价", "周宁", ["¥840/㎡", "¥860/㎡", "¥420/㎡"]),
+          assessmentCheck("预估项目总成本", "周宁", ["¥57.2M", "¥61.3M", "¥47.1M"]),
+          assessmentCheck("施工是否指定供应商", "周宁", ["否", "机电指定", "是"]),
+          assessmentCheck("全周期单工位成本", "刘倩", ["¥6,820/工位/月", "¥7,360/工位/月", "¥7,080/工位/月"]),
           assessmentSummary(["合理", "偏高", "有条件通过"], ["全周期单工位成本最低。", "区位溢价明显，可作为备用方案。", "初始成本低，长期运营成本偏高。"])
         ]
       },
@@ -2008,12 +2096,12 @@
       const summaryCopy = {
         new: ["AI 总结：当前项目正在推进短名单评估与推荐", "优先收口多专业意见、最终报价和 Site Recommendation；短名单提交、评估完成、审批完成及合同完成会自动推动项目状态。"],
         renew: ["AI 总结：续租谈判已进入关键窗口", "业主第二轮报价仍高于市场中位数，建议以搬迁全周期成本为谈判底线，重点锁定有效租金、续租选择权和报价有效期，并在通知截止日前完成审批。"],
-        relocation: ["AI 总结：新址评估与原址退出需同步推进", "当前重点是比较三处新址的全周期成本和连续性方案，同时锁定原址退租通知、复原责任和租期重叠上限，避免新旧场地计划脱节。"]
+        surrender: ["AI 总结：原址退租范围正在确认", "该退租项目由换租需求派生，与新址新租项目双向关联；当前重点是锁定退租楼层、正式通知期限、复原责任、费用结算和保证金回收。"]
       };
       const checklistCopy = {
         new: ["提交短名单筛选总结并确认三处候选场地。","收口各专业评估意见和业主最终报价。","审批完成后提前准备合同关键条款。"],
         renew: ["在最晚通知日前完成续租推荐审批。","推动业主确认有效租金、免租期和续租选择权。","保留替代方案成本作为最终谈判底线。"],
-        relocation: ["完成三处新址的技术、成本和业务连续性评估。","同步确认原址退租通知及复原责任边界。","将双租期控制在 3 个月内并锁定分批搬迁窗口。"]
+        surrender: ["确认 L8-12 退租范围和资产清单。","在截止日前完成退租审批并发出正式通知。","跟踪复原验收、费用结算和保证金回收。"]
       };
       summary.querySelector("h3").textContent = summaryCopy[type][0];
       summary.querySelector("p").textContent = summaryCopy[type][1];
@@ -2111,7 +2199,7 @@
     }
 
     function assessmentRoleControls(site, siteIndex) {
-      return `<div class="site-role-actions"><button type="button" class="site-role-button preferred ${site.assessmentRole === "preferred" ? "active" : ""}" data-assessment-role="preferred" data-assessment-site="${siteIndex}">${site.assessmentRole === "preferred" ? "✓ 推荐意向" : "设为推荐意向"}</button>${site.assessmentRole === "preferred" ? `<button type="button" class="site-report-button" data-generate-site-recommendation="${siteIndex}">Generate Site Recommendation Report</button>` : ""}<button type="button" class="site-role-button backup ${site.assessmentRole === "backup" ? "active" : ""}" data-assessment-role="backup" data-assessment-site="${siteIndex}">${site.assessmentRole === "backup" ? "✓ 备用场地" : "设为备用"}</button></div>`;
+      return `<div class="site-role-actions"><button type="button" class="site-role-button preferred ${site.assessmentRole === "preferred" ? "active" : ""}" data-assessment-role="preferred" data-assessment-site="${siteIndex}">${site.assessmentRole === "preferred" ? "✓ 推荐意向" : "设为推荐意向"}</button>${site.assessmentRole === "preferred" ? `<button type="button" class="site-report-button" data-generate-site-recommendation="${siteIndex}">Generate Strategy Paper</button>` : ""}<button type="button" class="site-role-button backup ${site.assessmentRole === "backup" ? "active" : ""}" data-assessment-role="backup" data-assessment-site="${siteIndex}">${site.assessmentRole === "backup" ? "✓ 备用场地" : "设为备用"}</button></div>`;
     }
 
     function renderAssessmentChecklistMatrix() {
@@ -2121,9 +2209,10 @@
         const summaryCheckIndex = dimension.checks.length - 1;
         const summary = dimension.checks[summaryCheckIndex];
         const isExpanded = expandedAssessmentDimensions.has(dimensionIndex);
-        const summaryRow = `<tr class="dimension-summary-row"><td><div class="dimension-group-header"><button class="dimension-toggle" type="button" data-toggle-assessment-dimension="${dimensionIndex}" aria-expanded="${isExpanded}"><strong>${dimensionIndex + 1}. ${dimension.title}</strong><span class="owner-chips">${dimension.reviewers.map(reviewer => `<span class="owner-chip">${reviewer}</span>`).join("")}</span><small>${isExpanded ? "收起详细检查清单" : `展开详细检查清单 · ${summaryCheckIndex} 项`}</small></button><button class="assessment-doc-upload ${dimension.documentUploaded ? "uploaded" : ""}" type="button" data-upload-assessment-document="${dimensionIndex}">${dimension.documentUploaded ? `✓ 文档已识别 · 自动填充 ${summaryCheckIndex - 1} 项` : "上传评估文档并自动识别"}</button></div></td>${shortlistedSites.map((site, buildingIndex) => `<td class="${site.assessmentRole || ""}"><div class="dimension-summary-cell"><span class="tag ${summary.status[buildingIndex] === "通过" || summary.status[buildingIndex] === "达标" || summary.status[buildingIndex] === "合理" ? "ok" : "warn"}">${summary.status[buildingIndex]}</span><p>${summary.values[buildingIndex]}</p></div></td>`).join("")}</tr>`;
+        const standardLink = dimension.title === "租赁条款评估" ? `<a class="inline-link" href="#lease-term-standard" data-reference-link>租赁条款管控标准</a>` : "";
+        const summaryRow = `<tr class="dimension-summary-row"><td><div class="dimension-group-header"><button class="dimension-toggle" type="button" data-toggle-assessment-dimension="${dimensionIndex}" aria-expanded="${isExpanded}"><strong>${dimensionIndex + 1}. ${dimension.title}</strong>${standardLink}<span class="owner-chips">${dimension.reviewers.map(reviewer => `<span class="owner-chip">${reviewer}</span>`).join("")}</span><small>${isExpanded ? "收起详细检查清单" : `展开详细检查清单 · ${summaryCheckIndex} 项`}</small></button><button class="assessment-doc-upload ${dimension.documentUploaded ? "uploaded" : ""}" type="button" data-upload-assessment-document="${dimensionIndex}">${dimension.documentUploaded ? `✓ 文档已识别 · 自动填充 ${summaryCheckIndex} 项` : "上传评估文档并自动识别"}</button></div></td>${shortlistedSites.map((site, buildingIndex) => `<td class="${site.assessmentRole || ""}"><div class="dimension-summary-cell"><span class="tag ${summary.status[buildingIndex] === "通过" || summary.status[buildingIndex] === "达标" || summary.status[buildingIndex] === "合理" ? "ok" : "warn"}">${summary.status[buildingIndex]}</span><p>${summary.values[buildingIndex]}</p></div></td>`).join("")}</tr>`;
         if (!isExpanded) return summaryRow;
-        const detailRows = dimension.checks.slice(0, -1).map((check, checkIndex) => `<tr class="dimension-detail-row ${check.custom ? "custom-metric-row" : ""}"><td><div class="assessment-check-label"><strong ${check.custom ? 'contenteditable="true" data-assessment-check-label' : ""} data-dimension-index="${dimensionIndex}" data-check-index="${checkIndex}">${check.name}</strong><small>${check.owner}${dimension.documentUploaded && !check.custom ? " · 文档识别" : ""}</small></div></td>${shortlistedSites.map((site, buildingIndex) => `<td class="building-assessment-input ${site.assessmentRole || ""}"><textarea data-assessment-value data-dimension-index="${dimensionIndex}" data-check-index="${checkIndex}" data-building-index="${buildingIndex}" aria-label="${site.name} · ${check.name} · 检查结果">${check.values[buildingIndex]}</textarea></td>`).join("")}</tr>`).join("");
+        const detailRows = dimension.checks.slice(0, -1).map((check, checkIndex) => `<tr class="dimension-detail-row ${check.custom ? "custom-metric-row" : ""}"><td><div class="assessment-check-label"><strong ${check.custom ? 'contenteditable="true" data-assessment-check-label' : ""} data-dimension-index="${dimensionIndex}" data-check-index="${checkIndex}">${check.name}</strong><small>${check.owner}${check.standard ? ` · 标准：${check.standard}` : ""}${dimension.documentUploaded && !check.custom ? " · 文档识别" : ""}</small></div></td>${shortlistedSites.map((site, buildingIndex) => `<td class="building-assessment-input ${site.assessmentRole || ""}"><textarea data-assessment-value data-dimension-index="${dimensionIndex}" data-check-index="${checkIndex}" data-building-index="${buildingIndex}" aria-label="${site.name} · ${check.name} · 检查结果">${check.values[buildingIndex]}</textarea></td>`).join("")}</tr>`).join("");
         return summaryRow + detailRows;
       }).join("");
       const comparisonSection = `<tr class="comparison-section-row"><td><div class="comparison-section-title"><strong>6. 集中对比指标</strong><small>评分、完成度、成本、租期与条款继续在评估指标组下方展示。</small><button class="btn" type="button" data-add-comparison-metric>＋ 新增对比指标</button></div></td>${shortlistedSites.map((site, buildingIndex) => `<td class="${site.assessmentRole || ""}"><div class="comparison-score"><span class="tag ${site.assessmentRole === "preferred" ? "ok" : site.assessmentRole === "backup" ? "warn" : ""}">综合评分 ${sites[buildingIndex].score}</span><span class="tag ${sites[buildingIndex].coverage.includes("100%") ? "ok" : "warn"}">${sites[buildingIndex].coverage}</span></div></td>`).join("")}</tr>`;
@@ -2185,8 +2274,45 @@
       document.getElementById("leaseProjectDetail").classList.add("hidden");
     }
 
-    function renderDetailGroups(groups, sourceLabel, allFromSource = false) {
-      return groups.map(([title, fields], index) => `<details class="process-accordion detail-group" ${index < 2 ? "open" : ""}><summary><span class="process-title"><span class="tag ${index === 0 ? "ok" : ""}">${index === 0 ? "已预填" : "可补充"}</span><b>${title}</b></span><span class="tag">${fields.length} 个字段</span></summary><div class="process-body"><div class="basic-info-grid">${fields.map(([label, value]) => `<div class="info-cell"><span>${label}</span><strong contenteditable="false">${value}</strong><small class="field-source-note" data-source="${index === 0 || allFromSource ? sourceLabel : "本模块补录"}">来源：${index === 0 || allFromSource ? sourceLabel : "本模块补录"}</small></div>`).join("")}</div><div class="recommendation-head"><span class="save-status">点击编辑后可修改本组字段。</span><button class="btn" data-edit-detail-group>编辑</button></div></div></details>`).join("");
+    function normalizeFieldValue(value) {
+      return String(value || "").trim().replace(/\s+/g, " ").toLowerCase();
+    }
+
+    function renderDetailGroups(groups, sourceLabel, allFromSource = false, baselineMap = null) {
+      return groups.map(([title, fields], index) => {
+        const fieldHTML = fields.map(([label, value]) => {
+          const baseline = baselineMap?.[label];
+          const deviates = baseline && normalizeFieldValue(value) !== normalizeFieldValue(baseline.value);
+          const source = index === 0 || allFromSource ? sourceLabel : "本模块补录";
+          const baselineAttrs = baseline ? ` data-baseline-value="${escapeHTML(baseline.value)}" data-baseline-source="${escapeHTML(baseline.source)}" data-baseline-severity="${baseline.severity}"` : "";
+          const baselineNote = baseline ? `<small class="baseline-note">决策基线：${escapeHTML(baseline.value)} · 来源：${escapeHTML(baseline.source)}</small>` : "";
+          return `<div class="info-cell ${deviates ? "deviation-field" : ""}" data-field-label="${escapeHTML(label)}"${baselineAttrs}><span>${label}</span><strong contenteditable="false">${value}</strong><small class="field-source-note" data-source="${source}">来源：${source}</small>${baselineNote}</div>`;
+        }).join("");
+        return `<details class="process-accordion detail-group" ${index < 2 ? "open" : ""}><summary><span class="process-title"><span class="tag ${index === 0 ? "ok" : ""}">${index === 0 ? "已预填" : "可补充"}</span><b>${title}</b></span><span class="tag">${fields.length} 个字段</span></summary><div class="process-body"><div class="basic-info-grid">${fieldHTML}</div><div class="recommendation-head"><span class="save-status">点击编辑后可修改本组字段，系统实时比对决策基线。</span><button class="btn" data-edit-detail-group>编辑</button></div></div></details>`;
+      }).join("");
+    }
+
+    function refreshContractDeviations() {
+      const cells = [...document.querySelectorAll("#contractDetailContent [data-baseline-value]")];
+      let deviationCount = 0;
+      let highRiskCount = 0;
+      cells.forEach(cell => {
+        const current = cell.querySelector("strong")?.textContent || "";
+        const deviates = normalizeFieldValue(current) !== normalizeFieldValue(cell.dataset.baselineValue);
+        cell.classList.toggle("deviation-field", deviates);
+        if (deviates) {
+          deviationCount += 1;
+          if (cell.dataset.baselineSeverity === "high") highRiskCount += 1;
+        }
+      });
+      const summary = document.getElementById("contractDeviationSummary");
+      if (!summary) return;
+      const message = summary.querySelector("div");
+      message.innerHTML = `<strong>${deviationCount} 个字段偏离决策基线</strong><small>${highRiskCount ? `其中 ${highRiskCount} 个高风险字段需确认后方可提交合同` : "当前无未确认的高风险偏差"}</small>`;
+      summary.classList.toggle("hidden", deviationCount === 0);
+      const confirmButton = document.getElementById("confirmContractDeviationBtn");
+      confirmButton.disabled = highRiskCount === 0 || contractDeviationConfirmed;
+      confirmButton.textContent = contractDeviationConfirmed ? "高风险偏差已确认" : "确认高风险偏差";
     }
 
     function initializeDetailEditor(container) {
@@ -2239,9 +2365,39 @@
       initializeDetailEditor(document.getElementById("initiationDetailContent"));
     }
 
+    function expandFloors(value) {
+      const match = String(value).match(/^L(\d+)-(\d+)$/);
+      if (!match) return [value];
+      const start = Number(match[1]);
+      const end = Number(match[2]);
+      return Array.from({ length: end - start + 1 }, (_, index) => `L${start + index}`);
+    }
+
+    function allocatedFloorArea(area, floorCount) {
+      const numeric = Number(String(area).replace(/[^\d.]/g, ""));
+      if (!numeric || !floorCount) return area;
+      return `${Math.round(numeric / floorCount).toLocaleString()} ㎡`;
+    }
+
+    function renderContractBrowser() {
+      const building = contractBuildings[activeContractBuilding];
+      document.getElementById("contractBuildingMenu").innerHTML = contractBuildings.map((item, index) => `<button type="button" class="${index === activeContractBuilding ? "active" : ""}" data-building-index="${index}"><strong>${item.name}</strong><small>${item.contracts.length} 份合同 · ${item.area}</small></button>`).join("");
+      document.getElementById("contractBuildingSummary").innerHTML = `<div class="info-cell"><span>当前楼宇</span><strong>${building.name}</strong></div><div class="info-cell"><span>地址</span><strong>${building.address}</strong></div><div class="info-cell"><span>合同数量</span><strong>${building.contracts.length}</strong></div><div class="info-cell"><span>总租赁面积</span><strong>${building.area}</strong></div>`;
+      document.querySelectorAll("[data-contract-view]").forEach(button => button.classList.toggle("active", button.dataset.contractView === activeContractView));
+      const content = document.getElementById("contractBuildingContent");
+      if (activeContractView === "floor") {
+        content.innerHTML = `<div class="table-wrap"><table><thead><tr><th>楼层</th><th>对应合同</th><th>合同类型</th><th>租赁面积（分摊）</th><th>租赁期限</th><th>合同状态</th><th>操作</th></tr></thead><tbody>${building.contracts.map(contract => { const floors = expandFloors(contract.floors); return floors.map(floor => `<tr><td>${floor}</td><td>${contract.name}<br><small>${contract.number}</small></td><td>${contract.type}</td><td>${allocatedFloorArea(contract.area, floors.length)}</td><td>${contract.term}</td><td><span class="tag ${contract.status === "条款协商" ? "warn" : "ok"}">${contract.status}</span></td><td><button class="row-button" data-contract-open="${contract.id}">查看合同详情</button></td></tr>`).join(""); }).join("")}</tbody></table></div>`;
+      } else {
+        content.innerHTML = `<div class="contract-card-grid">${building.contracts.map(contract => `<article class="contract-card"><h3>${contract.name}</h3><small>${contract.number}</small><p><span class="tag ${contract.status === "条款协商" ? "warn" : "ok"}">${contract.status}</span></p><p>楼层：${contract.floors} · 面积：${contract.area}</p><p>类型：${contract.type} · 租期：${contract.term}</p><p><strong>关键提醒：</strong>${contract.reminder}</p><div class="actions"><button class="row-button" data-contract-open="${contract.id}">查看合同详情</button></div></article>`).join("")}</div>`;
+      }
+      document.getElementById("contractLedgerRows").innerHTML = contractBuildings.flatMap(item => item.contracts.map(contract => `<tr><td>${contract.number}</td><td>${contractRecords[contract.id].project}</td><td>${contract.type}</td><td>${contract.floors}</td><td>${contract.term}</td><td><span class="tag ${contract.status === "条款协商" ? "warn" : "ok"}">${contract.status}</span></td><td>${contract.reminder}</td><td><button class="row-button" data-contract-open="${contract.id}">查看详情</button></td></tr>`)).join("");
+      applyLanguage(document.getElementById("contractList"));
+    }
+
     function showContractList() {
       document.getElementById("contractList").classList.remove("hidden");
       document.getElementById("contractDetail").classList.add("hidden");
+      renderContractBrowser();
     }
 
     function openContractDetail(id) {
@@ -2253,14 +2409,25 @@
       const status = document.getElementById("contractDetailStatus");
       status.textContent = record.status;
       status.className = `tag ${record.status === "已签署" || record.status === "已归档" ? "ok" : "warn"}`;
-      document.getElementById("contractDetailContent").innerHTML = renderDetailGroups(contractGroups, "来自选址审批 / 租赁立项");
+      contractDeviationConfirmed = false;
+      const selectedContract = contractBuildings.flatMap(building => building.contracts).find(contract => contract.id === id);
+      const detailGroups = contractGroups.map(([title, fields]) => [title, fields.map(([label, value]) => {
+        if (!selectedContract) return [label, value];
+        if (label === "合同号") return [label, selectedContract.number];
+        if (label === "楼层") return [label, selectedContract.floors];
+        if (label === "合同状态") return [label, selectedContract.status];
+        if (label === "租赁面积") return [label, selectedContract.area];
+        return [label, value];
+      })]);
+      document.getElementById("contractDetailContent").innerHTML = renderDetailGroups(detailGroups, "来自选址决策 / 场地登记 / 租赁立项", false, id === "sz" ? contractBaselines : null);
       initializeDetailEditor(document.getElementById("contractDetailContent"));
+      refreshContractDeviations();
     }
 
     function openSiteRegistrationWorkspace() {
       const workspace = document.getElementById("siteRegistrationWorkspace");
       workspace.classList.remove("hidden");
-      document.getElementById("siteRegistrationContent").innerHTML = renderDetailGroups(siteRegistrationGroups, "来自选址决策 / 租赁立项", true);
+      document.getElementById("siteRegistrationContent").innerHTML = renderDetailGroups(siteRegistrationGroups, "来自选址决策 / 业务场地确认", true);
       initializeDetailEditor(document.getElementById("siteRegistrationContent"));
       document.getElementById("siteRegistrationFlowStatus").textContent = "填写中";
       document.getElementById("siteRegistrationFlowStatus").className = "tag warn";
@@ -2347,10 +2514,46 @@
       renderPortfolioChart(btn.dataset.portfolioQuery);
     }));
 
-    document.querySelectorAll("[data-project-open]").forEach(btn => btn.addEventListener("click", () => openProjectDetail(btn.dataset.projectName, btn.dataset.projectType, btn.dataset.statusIndex)));
+    document.getElementById("createLeaseProjectBtn").addEventListener("click", () => {
+      const type = document.getElementById("newProjectType").value;
+      const rows = document.getElementById("leaseProjectRows");
+      const timestamp = String(Date.now()).slice(-4);
+      if (type === "relocation") {
+        const relationId = `RG-DEMO-${timestamp}`;
+        rows.insertAdjacentHTML("beforeend", `<tr><td>TM-DEMO-${timestamp}-N</td><td>换租需求 · 新址</td><td>新租</td><td>待填写</td><td><span class="tag">场地寻源中</span></td><td>待分配</td><td>待填写</td><td><button class="row-button" data-project-open data-project-name="换租需求 · 新址" data-project-type="new" data-status-index="0">查看项目</button><br><small>关联组 ${relationId}</small></td></tr><tr><td>TM-DEMO-${timestamp}-S</td><td>换租需求 · 原址退租</td><td>退租</td><td>待填写</td><td><span class="tag">退租需求中</span></td><td>待分配</td><td>待填写</td><td><button class="row-button" data-project-open data-project-name="换租需求 · 原址退租" data-project-type="surrender" data-status-index="0">查看项目</button><br><small>关联组 ${relationId}</small></td></tr>`);
+        document.getElementById("createProjectStatus").textContent = `已从换租需求派生独立的新租和退租项目，并通过 ${relationId} 双向关联。`;
+      } else {
+        const typeMap = { new: "新租", expansion: "扩租", renew: "续租", surrender: "退租" };
+        const templateType = type === "expansion" ? "new" : type;
+        rows.insertAdjacentHTML("beforeend", `<tr><td>TM-DEMO-${timestamp}</td><td>${typeMap[type]}项目（草稿）</td><td>${typeMap[type]}</td><td>待填写</td><td><span class="tag">草稿</span></td><td>待分配</td><td>待填写</td><td><button class="row-button" data-project-open data-project-name="${typeMap[type]}项目（草稿）" data-project-type="${templateType}" data-status-index="0">查看项目</button></td></tr>`);
+        document.getElementById("createProjectStatus").textContent = `已创建${typeMap[type]}项目草稿。`;
+      }
+    });
+    document.getElementById("leaseProjectRows").addEventListener("click", event => {
+      const button = event.target.closest("[data-project-open]");
+      if (button) openProjectDetail(button.dataset.projectName, button.dataset.projectType, button.dataset.statusIndex);
+    });
     document.querySelectorAll("[data-workstream]").forEach(btn => btn.addEventListener("click", () => openWorkstreamDetail(btn.dataset.record)));
     document.querySelectorAll("[data-initiation-open]").forEach(btn => btn.addEventListener("click", () => openInitiationDetail(btn.dataset.initiationOpen)));
     document.querySelectorAll("[data-contract-open]").forEach(btn => btn.addEventListener("click", () => openContractDetail(btn.dataset.contractOpen)));
+    document.getElementById("contractList").addEventListener("click", event => {
+      const contractButton = event.target.closest("[data-contract-open]");
+      if (contractButton) {
+        openContractDetail(contractButton.dataset.contractOpen);
+        return;
+      }
+      const buildingButton = event.target.closest("[data-building-index]");
+      if (buildingButton) {
+        activeContractBuilding = Number(buildingButton.dataset.buildingIndex);
+        renderContractBrowser();
+        return;
+      }
+      const viewButton = event.target.closest("[data-contract-view]");
+      if (viewButton) {
+        activeContractView = viewButton.dataset.contractView;
+        renderContractBrowser();
+      }
+    });
     document.getElementById("projectBackBtn").addEventListener("click", showProjectList);
     document.getElementById("initiationBackBtn").addEventListener("click", showInitiationList);
     document.getElementById("contractBackBtn").addEventListener("click", showContractList);
@@ -2360,8 +2563,15 @@
     });
     document.getElementById("initiationDetailContent").addEventListener("click", handleDetailGroupEdit);
     document.getElementById("contractDetailContent").addEventListener("click", handleDetailGroupEdit);
+    document.getElementById("contractDetailContent").addEventListener("input", refreshContractDeviations);
+    document.getElementById("confirmContractDeviationBtn").addEventListener("click", () => {
+      contractDeviationConfirmed = true;
+      refreshContractDeviations();
+      document.querySelector("#contractDeviationSummary small").textContent = "高风险偏差已由租赁经理确认，确认人和时间已写入审计记录。";
+    });
     document.getElementById("siteRegistrationContent").addEventListener("click", handleDetailGroupEdit);
     document.getElementById("csEmailContent").addEventListener("click", handleDetailGroupEdit);
+    document.getElementById("registrationFlowStep").after(document.getElementById("siteRegistrationWorkspace"));
     document.getElementById("openSiteRegistrationBtn").addEventListener("click", openSiteRegistrationWorkspace);
     document.getElementById("closeSiteRegistrationBtn").addEventListener("click", () => document.getElementById("siteRegistrationWorkspace").classList.add("hidden"));
     document.getElementById("openCsEmailBtn").addEventListener("click", openCsEmailWorkspace);
@@ -2459,6 +2669,13 @@
       dimension.checks[Number(event.target.dataset.checkIndex)].status[Number(event.target.dataset.buildingIndex)] = event.target.value;
     });
     document.getElementById("assessmentMatrixGroups").addEventListener("click", event => {
+      const referenceLink = event.target.closest("[data-reference-link]");
+      if (referenceLink) {
+        event.preventDefault();
+        event.stopPropagation();
+        document.getElementById("assessmentSaveStatus").textContent = "已打开《租赁条款管控标准》参考入口（Demo 中以提示代替实际文档）。";
+        return;
+      }
       const uploadAssessmentDocument = event.target.closest("[data-upload-assessment-document]");
       if (uploadAssessmentDocument) {
         const dimensionIndex = Number(uploadAssessmentDocument.dataset.uploadAssessmentDocument);
@@ -2482,7 +2699,7 @@
       if (reportButton) {
         const preferredSite = sourcingSites[Number(reportButton.dataset.generateSiteRecommendation)];
         const backupSite = sourcingSites.find(site => site.assessmentRole === "backup");
-        document.getElementById("assessmentSaveStatus").textContent = `Site Recommendation Report 已生成：推荐意向 ${preferredSite.name}${backupSite ? `，备用 ${backupSite.name}` : ""}；等待补充决策材料。`;
+        document.getElementById("assessmentSaveStatus").textContent = `Strategy Paper 已生成：推荐意向 ${preferredSite.name}${backupSite ? `，备用 ${backupSite.name}` : ""}；可进入决策文档上传与存档。`;
         document.querySelectorAll(".process-accordion")[3].open = true;
         return;
       }
@@ -2551,23 +2768,23 @@
       document.getElementById("locationInfo").classList.remove("hidden");
       document.getElementById("siteRegistrationStatus").textContent = "已完成";
       document.getElementById("siteRegistrationStatus").className = "tag ok";
-      document.getElementById("siteRegistrationSaveStatus").textContent = "场地信息登记已完成，CS 邮件同步已解锁。";
+      document.getElementById("siteRegistrationSaveStatus").textContent = "场地信息登记已完成，租赁立项已解锁。";
       document.getElementById("siteRegistrationFlowStatus").textContent = "已完成";
       document.getElementById("siteRegistrationFlowStatus").className = "tag ok";
       document.getElementById("registrationFlowStep").className = "integration completed";
-      document.getElementById("csEmailFlowStep").classList.remove("locked");
-      document.getElementById("csEmailFlowStatus").textContent = "待填写";
-      document.getElementById("csEmailFlowStatus").className = "tag warn";
-      document.getElementById("openCsEmailBtn").disabled = false;
+      document.getElementById("initiationFlowStep").classList.remove("locked");
+      document.getElementById("initiationFlowStatus").textContent = "待立项";
+      document.getElementById("initiationFlowStatus").className = "tag warn";
+      document.getElementById("completeInitiationBtn").disabled = false;
       document.getElementById("completeSiteRegistrationBtn").textContent = "已完成登记";
       document.getElementById("completeSiteRegistrationBtn").disabled = true;
     });
     document.getElementById("saveRecommendationBtn").addEventListener("click", () => {
-      document.getElementById("recommendationSaveStatus").textContent = "决策结论已保存，业务场地确认已解锁。";
-      document.getElementById("decisionFlowStatus").textContent = "已保存";
+      document.getElementById("recommendationSaveStatus").textContent = "决策文档已上传并存档，业务场地确认已解锁。";
+      document.getElementById("decisionFlowStatus").textContent = "已存档";
       document.getElementById("decisionFlowStatus").className = "tag ok";
       document.getElementById("decisionFlowStep").className = "integration completed";
-      document.getElementById("saveRecommendationBtn").textContent = "已保存";
+      document.getElementById("saveRecommendationBtn").textContent = "已上传存档";
       document.getElementById("saveRecommendationBtn").disabled = true;
       document.getElementById("businessFlowStep").classList.remove("locked");
       document.getElementById("businessConfirmationStatus").textContent = "待确认";
@@ -2580,10 +2797,10 @@
       document.getElementById("businessFlowStep").className = "integration completed";
       document.getElementById("completeBusinessConfirmationBtn").textContent = "已确认";
       document.getElementById("completeBusinessConfirmationBtn").disabled = true;
-      document.getElementById("initiationFlowStep").classList.remove("locked");
-      document.getElementById("initiationFlowStatus").textContent = "待立项";
-      document.getElementById("initiationFlowStatus").className = "tag warn";
-      document.getElementById("completeInitiationBtn").disabled = false;
+      document.getElementById("registrationFlowStep").classList.remove("locked");
+      document.getElementById("siteRegistrationFlowStatus").textContent = "待填写";
+      document.getElementById("siteRegistrationFlowStatus").className = "tag warn";
+      document.getElementById("openSiteRegistrationBtn").disabled = false;
     });
     document.getElementById("completeInitiationBtn").addEventListener("click", () => {
       document.getElementById("initiationFlowStatus").textContent = "已完成";
@@ -2591,10 +2808,10 @@
       document.getElementById("initiationFlowStep").className = "integration completed";
       document.getElementById("completeInitiationBtn").textContent = "已完成";
       document.getElementById("completeInitiationBtn").disabled = true;
-      document.getElementById("registrationFlowStep").classList.remove("locked");
-      document.getElementById("siteRegistrationFlowStatus").textContent = "待填写";
-      document.getElementById("siteRegistrationFlowStatus").className = "tag warn";
-      document.getElementById("openSiteRegistrationBtn").disabled = false;
+      document.getElementById("csEmailFlowStep").classList.remove("locked");
+      document.getElementById("csEmailFlowStatus").textContent = "待填写";
+      document.getElementById("csEmailFlowStatus").className = "tag warn";
+      document.getElementById("openCsEmailBtn").disabled = false;
     });
 
     renderWorkflow();
